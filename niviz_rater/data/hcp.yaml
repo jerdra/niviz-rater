@@ -1,0 +1,37 @@
+# Each row of participants.tsv will be a unique combination of the following
+RowEntities: [subject]
+ImageExtensions: ["png", "svg", "jpeg", "jpg", "svg"]
+
+RowDescription:
+  entities: [subject]
+  name: "${subject}"
+
+Components:
+  - entities: [subject]
+    name: "${subject} anatomical"
+    column: "anatomical"
+    images:
+      - {description: t1wt2wcoreg}
+      - {description: t1w2mni}
+      - {description: t1wsurf}
+        #      - {description: myelinmap}
+    ratings:
+      - T1-T2 Mismatch
+      - Incorrect MNI transform
+      - T1 surface reconstruction issue
+      - Bad Myelin Map
+      - Good
+
+  - entities: [subject, session, task, run]
+    name: "${subject} session:${session} task:${task} run:${run} fMRI"
+    column: "ses-${session}_task-${task}_run-${run}"
+    images:
+      - {description: episdc}
+      - {description: epi2t1w}
+      - {description: epi32k}
+    ratings:
+      - Inappropriate SDC Correction
+      - EPI-T1 mismatch
+      - EPI fsaverage LR32K surface mismatch
+      - Good
+

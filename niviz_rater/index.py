@@ -10,6 +10,7 @@ import logging
 from string import Template
 from dataclasses import dataclass
 from collections import namedtuple
+import yamale
 
 from bids.layout import BIDSLayout, add_config_paths
 
@@ -20,12 +21,22 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_BIDS = os.path.join(os.path.dirname(__file__), 'data/bids.json')
 
+SCHEMAFILE = os.path.join(os.path.dirname(__file__), 'data/schema.yaml')
+
 AxisNameTpl = namedtuple('AxisNameTpl', ('tpl', 'entities'))
 
 
 def _validate_config(config):
+
+    schema = yamale.make_schema(SCHEMAFILE)
+
+    yamaledata = yamale.make_data(config)
+
+    yamale.validate(schema, yamaledata)
+
     with open(config, 'r') as f:
         config = yaml.load(f, Loader=yaml.CLoader)
+
     return config
 
 

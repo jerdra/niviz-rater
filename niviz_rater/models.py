@@ -1,5 +1,5 @@
 from peewee import (Model, ForeignKeyField, TextField, CharField, BooleanField)
-from niviz.app import db
+from niviz_rater import db
 
 
 class BaseModel(Model):

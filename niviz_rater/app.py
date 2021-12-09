@@ -9,8 +9,8 @@ from http.server import HTTPServer, SimpleHTTPRequestHandler
 from threading import Thread
 from functools import partial
 
-from niviz.app.index import build_index
-from niviz.app.api import apiRoutes
+from niviz_rater.app.index import build_index
+from niviz_rater.app.api import apiRoutes
 
 logger = logging.getLogger(__file__)
 
@@ -31,7 +31,7 @@ def home(path):
 @route('/user_path')
 def user_path():
     logging.info("User path selected")
-    return str(app.config['niviz.base_path'])
+    return str(app.config['niviz_rater.base_path'])
 
 
 def launch_fileserver(base_directory, port=5002, hostname='localhost'):
@@ -84,7 +84,7 @@ def main():
                         help="Use an existing database file")
 
     args = parser.parse_args()
-    app.config['niviz.base_path'] = args.base_directory
+    app.config['niviz_rater.base_path'] = args.base_directory
 
     logging.info("Building Index of QC images")
     if not args.use_existing_index:
@@ -92,7 +92,7 @@ def main():
 
     _, address = launch_fileserver(args.base_directory,
                                    port=args.fileserver_port)
-    app.config['niviz.fileserver'] = address
+    app.config['niviz_rater.fileserver'] = address
 
     app.merge(apiRoutes)
     debug(True)

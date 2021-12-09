@@ -4,8 +4,8 @@ API for accessing and updating stored QC Index
 
 import os
 from bottle import route, Bottle, request, response
-from niviz.app.models import (Entity, Image, TableRow, TableColumn, Rating)
-from niviz.app import db
+from niviz_rater.app.models import (Entity, Image, TableRow, TableColumn, Rating)
+from niviz_rater.app import db
 import logging
 from peewee import JOIN, prefetch
 
@@ -18,8 +18,8 @@ def _fileserver(path, app_config):
     Transform local directory path to fileserver path
     '''
 
-    base = app_config['niviz.base_path']
-    address = app_config['niviz.fileserver']
+    base = app_config['niviz_rater.base_path']
+    address = app_config['niviz_rater.fileserver']
 
     img = os.path.relpath(path, base)
     addr = f"{address}/{img}"

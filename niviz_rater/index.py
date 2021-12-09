@@ -33,7 +33,6 @@ def _validate_config(config):
 
     yamaledata = yamale.make_data(config)
 
-    # validate config against schema; returns ValueError if invalid
     yamale.validate(schema, yamaledata)
 
     with open(config, 'r') as f:

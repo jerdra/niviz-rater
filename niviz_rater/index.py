@@ -27,7 +27,7 @@ AxisNameTpl = namedtuple('AxisNameTpl', ('tpl', 'entities'))
 
 
 def _validate_config(config):
-    
+
     # load schema as yamale schema object
     schema = yamale.make_schema(SCHEMAFILE)
 

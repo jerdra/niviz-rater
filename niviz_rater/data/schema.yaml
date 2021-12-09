@@ -13,7 +13,12 @@ Component:
   images: list(include('image'), min = 1)
   ratings: include('rating', min = 1)
 
-entity: enum('bids', 'subject', 'session', 'task', 'acquisition', 'ceagent', 'reconstruction', 'direction', 'run', 'proc', 'modality', 'echo', 'flip', 'inv', 'mt', 'part', 'recording', 'space', 'suffix', 'scans', 'fmap', 'datatype', 'extension', 'derivatives', 'entities', 'atlas', 'roi', 'label', 'desc', 'from', 'to', 'mode', 'hemi', 'res', 'den', 'model', 'subset')
+entity: 'enum("bids", "subject", "session", "task", "acquisition",
+  "ceagent", "reconstruction", "direction", "run", "proc", "modality",
+  "echo", "flip", "inv", "mt", "part", "recording", "space", "suffix",
+  "scans", "fmap", "datatype", "extension", "derivatives", "entities",
+  "atlas", "roi", "label", "desc", "from", "to", "mode", "hemi", "res",
+  "den", "model", "subset")'
 
 image:
   description: str(exclude = '!?{}', min = 1)

@@ -1,7 +1,7 @@
 ImageExtensions: list(str(ignore_case = True), min = 1)
 
 RowDescription:
-  entities: list(str(matches = 'subject', min = 1))
+  entities: list(str(min = 1))
   name: str()
 
 Components: list(include('Component'), min = 1)

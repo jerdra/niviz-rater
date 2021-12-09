@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-Thank you for contributing to Niviz Rater! Before submitting this bug report, please take the time to read our [Contributing](https://github.com/jerdra/niviz/blob/main/CONTRIBUTING.md) guidelines surrounding submitting feature requests. If everything checks out, feel free to continue - we look forward to working with you!
+Thank you for contributing to Niviz Rater! Before submitting this bug report, please take the time to read our [Contributing](https://github.com/TIGRLab/niviz/blob/main/CONTRIBUTING.md) guidelines surrounding submitting feature requests. If everything checks out, feel free to continue - we look forward to working with you!
 
 **Is your feature request related to a problem? Please describe.**
 A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]

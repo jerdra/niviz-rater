@@ -9,8 +9,8 @@ from http.server import HTTPServer, SimpleHTTPRequestHandler
 from threading import Thread
 from functools import partial
 
-from niviz_rater.app.index import build_index
-from niviz_rater.app.api import apiRoutes
+from niviz_rater.index import build_index
+from niviz_rater.api import apiRoutes
 
 logger = logging.getLogger(__file__)
 

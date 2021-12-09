@@ -31,7 +31,6 @@ def _validate_config(config):
     # load schema as yamale schema object
     schema = yamale.make_schema(SCHEMAFILE)
 
-    # load config file as yamale data object
     yamaledata = yamale.make_data(config)
 
     # validate config against schema; returns ValueError if invalid

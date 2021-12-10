@@ -26,6 +26,10 @@ def get_entities():
 
 
 class Entities(Validator):
+    '''
+    Class to enable validation of BIDS entities
+    '''
+    
     tag = 'Entities'
 
     def _is_valid(self, value):

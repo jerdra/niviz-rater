@@ -10,7 +10,6 @@ import logging
 from string import Template
 from dataclasses import dataclass
 from collections import namedtuple
-import yamale
 
 from bids.layout import BIDSLayout, add_config_paths
 
@@ -30,13 +29,18 @@ SCHEMAFILE = os.path.join(os.path.dirname(__file__), 'data/schema.yaml')
 
 AxisNameTpl = namedtuple('AxisNameTpl', ('tpl', 'entities'))
 
+
 def load_json(file):
     with open(file, 'r') as f:
         result = json.load(f)
     return result
 
+
 def get_entities():
-    configfiles = [load_json(file)['entities'] for file in get_option('config_paths').values()]
+    configfiles = [
+        load_json(file)['entities']
+        for file in get_option('config_paths').values()
+    ]
     enumstrs = list()
     for configfile in configfiles:
         enumstr = [x['name'] for x in configfile]
@@ -44,17 +48,20 @@ def get_entities():
     enumstrs = [item for sublist in enumstrs for item in sublist]
     return enumstrs
 
+
 class Entities(Validator):
     tag = 'Entities'
+
     def _is_valid(self, value):
         return value in get_entities()
+
 
 def _validate_config(config):
 
     validators = DefaultValidators.copy()
     validators[Entities.tag] = Entities
-    
-    schema = yamale.make_schema(SCHEMAFILE, validators = validators)
+
+    schema = yamale.make_schema(SCHEMAFILE, validators=validators)
 
     yamaledata = yamale.make_data(config)
 

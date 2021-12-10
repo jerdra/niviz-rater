@@ -41,7 +41,6 @@ def _validate_config(config):
 
     schema = yamale.make_schema(SCHEMAFILE, validators=validators)
     yamaledata = yamale.make_data(config)
-
     yamale.validate(schema, yamaledata)
 
     with open(config, 'r') as f:

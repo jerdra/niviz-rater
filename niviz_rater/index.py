@@ -16,61 +16,11 @@ from bids.layout import BIDSLayout, add_config_paths
 from niviz_rater import db
 from niviz_rater.models import Entity, Rating, Image, Component, TableRow, TableColumn
 
-import json
-import yamale
-from yamale.validators import DefaultValidators, Validator
-from bids.config import get_option
-
 logger = logging.getLogger(__name__)
 
 DEFAULT_BIDS = os.path.join(os.path.dirname(__file__), 'data/bids.json')
 
-SCHEMAFILE = os.path.join(os.path.dirname(__file__), 'data/schema.yaml')
-
 AxisNameTpl = namedtuple('AxisNameTpl', ('tpl', 'entities'))
-
-
-def load_json(file):
-    with open(file, 'r') as f:
-        result = json.load(f)
-    return result
-
-
-def get_entities():
-    configfiles = [
-        load_json(file)['entities']
-        for file in get_option('config_paths').values()
-    ]
-    enumstrs = list()
-    for configfile in configfiles:
-        enumstr = [x['name'] for x in configfile]
-        enumstrs.append(enumstr)
-    enumstrs = [item for sublist in enumstrs for item in sublist]
-    return enumstrs
-
-
-class Entities(Validator):
-    tag = 'Entities'
-
-    def _is_valid(self, value):
-        return value in get_entities()
-
-
-def _validate_config(config):
-
-    validators = DefaultValidators.copy()
-    validators[Entities.tag] = Entities
-
-    schema = yamale.make_schema(SCHEMAFILE, validators=validators)
-
-    yamaledata = yamale.make_data(config)
-
-    yamale.validate(schema, yamaledata)
-
-    with open(config, 'r') as f:
-        config = yaml.load(f, Loader=yaml.CLoader)
-
-    return config
 
 
 @dataclass

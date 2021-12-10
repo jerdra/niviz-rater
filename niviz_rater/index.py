@@ -130,7 +130,7 @@ def build_index(qc_dataset, qc_config, bids_config=None):
                         index_metadata=False,
                         config=["user"])
 
-    bidsfiles = layout.get(extension=qc_config['ImageExtensions'])
+    bidsfiles = layout.get(extension=config['ImageExtensions'])
 
     row_tpl = AxisNameTpl(Template(config['RowDescription']['name']),
                           config['RowDescription']['entities'])

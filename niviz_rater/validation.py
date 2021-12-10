@@ -1,6 +1,6 @@
+import os
 import yaml
 import json
-import os
 import yamale
 from yamale.validators import DefaultValidators, Validator
 
@@ -31,12 +31,22 @@ class Entities(Validator):
 
     tag = 'Entities'
 
-    def __init__(self, valid_configs):
-        self.valid_configs = valid_configs
-        super(Entities, self).__init__()
-
     def _is_valid(self, value):
         return value in _get_valid_entities(self.valid_configs)
+
+
+def _configure_entity_validator(bids_configs):
+    '''
+    A little hack to work around Yamale requiring statically
+    defined classes for validation.
+
+    Dynamically the set of BIDS JSON configuration files
+    to validate against
+    '''
+
+    PatchedEntities = Entities
+    PatchedEntities.valid_configs = bids_configs
+    return PatchedEntities
 
 
 def validate_config(config, bids_configs, schema_file=SCHEMAFILE):
@@ -58,8 +68,9 @@ def validate_config(config, bids_configs, schema_file=SCHEMAFILE):
         YamaleError: If validation fails due to invalid `config` file
     '''
 
+    PatchedEntities = _configure_entity_validator(bids_configs)
     validators = DefaultValidators.copy()
-    validators[Entities.tag] = Entities(valid_configs=bids_configs)
+    validators[Entities.tag] = PatchedEntities
 
     schema = yamale.make_schema(schema_file, validators=validators)
     yamaledata = yamale.make_data(config)

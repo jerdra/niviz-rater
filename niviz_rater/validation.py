@@ -27,7 +27,7 @@ class Entities(Validator):
     from pyBIDS JSON configuration files
     '''
 
-    __slots__ = "valid_configs"
+    __slots__ = 'valid_configs'
 
     tag = 'Entities'
 

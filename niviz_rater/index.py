@@ -3,7 +3,6 @@ Module for handling and enforcing configuration rules for
 packaging and rules for associating QC images with an entity
 '''
 
-import yaml
 import os
 from itertools import groupby
 import logging
@@ -12,9 +11,12 @@ from dataclasses import dataclass
 from collections import namedtuple
 
 from bids.layout import BIDSLayout, add_config_paths
-from niviz.validation import validate_config
+import bids.config
+
+from niviz_rater.validation import validate_config
 from niviz_rater import db
-from niviz_rater.models import Entity, Rating, Image, Component, TableRow, TableColumn
+from niviz_rater.models import (Entity, Rating, Image, Component, TableRow,
+                                TableColumn)
 
 logger = logging.getLogger(__name__)
 
@@ -111,20 +113,6 @@ class ConfigComponent:
         return qc_entities
 
 
-def get_qc_bidsfiles(qc_dataset, qc_config, bids_config):
-    '''
-    Get BIDSFiles associated with qc_dataset
-    '''
-
-    add_config_paths(user=bids_config)
-    layout = BIDSLayout(qc_dataset,
-                        validate=False,
-                        index_metadata=False,
-                        config=["user"])
-    bidsfiles = layout.get(extension=qc_config['ImageExtensions'])
-    return bidsfiles
-
-
 def build_index(qc_dataset, qc_config, bids_config=None):
     '''
     Build database
@@ -132,10 +120,18 @@ def build_index(qc_dataset, qc_config, bids_config=None):
 
     if bids_config is None:
         bids_config = DEFAULT_BIDS
-        print(DEFAULT_BIDS)
 
-    config = _validate_config(qc_config)
-    bidsfiles = get_qc_bidsfiles(qc_dataset, config, bids_config)
+    add_config_paths(user=bids_config)
+    bids_configs = bids.config.get_option('config_paths').values()
+
+    config = validate_config(qc_config, bids_configs)
+    layout = BIDSLayout(qc_dataset,
+                        validate=False,
+                        index_metadata=False,
+                        config=["user"])
+
+    bidsfiles = layout.get(extension=config['ImageExtensions'])
+
     row_tpl = AxisNameTpl(Template(config['RowDescription']['name']),
                           config['RowDescription']['entities'])
 

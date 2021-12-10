@@ -21,9 +21,7 @@ def get_entities():
     ]
     enumstrs = []
     for configfile in configfiles:
-        enumstr = [x['name'] for x in configfile]
-        enumstrs.append(enumstr)
-    enumstrs = [item for sublist in enumstrs for item in sublist]
+        enumstrs.extend([entity['name'] for entity in configfile])
     return enumstrs
 
 

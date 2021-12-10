@@ -97,9 +97,12 @@ def main():
                         type=Path,
                         help="Path to pyBIDS configuration json")
     subparsers = parser.add_subparsers(help='sub-command help')
-    create_db_parser = subparsers.add_parser('initialize_db', help='Initialize database')
-    update_db_parser = subparsers.add_parser('update_db', help='Update database')
-    runserver_parser = subparsers.add_parser('runserver', help='Run bottle web interface')
+    create_db_parser = subparsers.add_parser('initialize_db',
+                                             help='Initialize database')
+    update_db_parser = subparsers.add_parser('update_db',
+                                             help='Update database')
+    runserver_parser = subparsers.add_parser('runserver',
+                                             help='Run bottle web interface')
 
     create_db_parser.set_defaults(func=initialize_db)
     update_db_parser.set_defaults(func=update_db)

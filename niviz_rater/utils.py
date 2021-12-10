@@ -1,13 +1,13 @@
 import logging
 import os
-import yaml
-import yamale
+from typing import List
 
-from typing import Optional, List, Dict, Any
 from bids.layout import BIDSLayout, add_config_paths
 
+DEFAULT_BIDS_FILE = os.path.join(os.path.dirname(__file__), 'data/bids.json')
 
-def update_bids_configuration(bids_config: str = os.path.join(os.path.dirname(__file__), 'data/bids.json')) -> None:
+
+def update_bids_configuration(bids_config: str = DEFAULT_BIDS_FILE) -> None:
     """
     Update configuration path for bids with
     """

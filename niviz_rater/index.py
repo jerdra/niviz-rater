@@ -1,33 +1,26 @@
-'''
+"""
 Module for handling and enforcing configuration rules for
 packaging and rules for associating QC images with an entity
-'''
+"""
 
-import yaml
-import os
 from itertools import groupby
 import logging
 from string import Template
 from dataclasses import dataclass
 from collections import namedtuple
 
-from bids.layout import BIDSLayout, add_config_paths
-from niviz.validation import validate_config
-from niviz_rater import db
 from niviz_rater.models import Entity, Rating, Image, Component, TableRow, TableColumn
 
 logger = logging.getLogger(__name__)
-
-DEFAULT_BIDS = os.path.join(os.path.dirname(__file__), 'data/bids.json')
 
 AxisNameTpl = namedtuple('AxisNameTpl', ('tpl', 'entities'))
 
 
 @dataclass
 class QCEntity:
-    '''
+    """
     Helper class to represent a single QC entity
-    '''
+    """
     images: list
     entities: dict
     tpl_name: str
@@ -43,10 +36,10 @@ class QCEntity:
 
 
 class ConfigComponent:
-    '''
+    """
     Configurable Factory class for building QC components
     from list of images
-    '''
+    """
     def __init__(self, entities, name, column, images, ratings):
         self.entities = entities
         self.name = name
@@ -55,9 +48,9 @@ class ConfigComponent:
         self.available_ratings = ratings
 
     def _group_by_entities(self, bidsfiles):
-        '''
+        """
         Sort list of bidsfiles by requested entities
-        '''
+        """
 
         filtered = [
             b for b in bidsfiles if all(k in b.entities for k in self.entities)
@@ -82,13 +75,13 @@ class ConfigComponent:
         return matches[0]
 
     def build_qc_entities(self, image_list):
-        '''
+        """
         Build QC Entities given a list of images
 
         Arguments:
             image_list          List of BIDSFile images
                                 to build QC entities from
-        '''
+        """
 
         qc_entities = []
 
@@ -111,49 +104,15 @@ class ConfigComponent:
         return qc_entities
 
 
-def get_qc_bidsfiles(qc_dataset, qc_config, bids_config):
-    '''
-    Get BIDSFiles associated with qc_dataset
-    '''
-
-    add_config_paths(user=bids_config)
-    layout = BIDSLayout(qc_dataset,
-                        validate=False,
-                        index_metadata=False,
-                        config=["user"])
-    bidsfiles = layout.get(extension=qc_config['ImageExtensions'])
-    return bidsfiles
-
-
-def build_index(qc_dataset, qc_config, bids_config=None):
-    '''
-    Build database
-    '''
-
-    if bids_config is None:
-        bids_config = DEFAULT_BIDS
-        print(DEFAULT_BIDS)
-
-    config = _validate_config(qc_config)
-    bidsfiles = get_qc_bidsfiles(qc_dataset, config, bids_config)
-    row_tpl = AxisNameTpl(Template(config['RowDescription']['name']),
-                          config['RowDescription']['entities'])
-
-    for c in config['Components']:
-        component = ConfigComponent(**c)
-        make_database(component.build_qc_entities(bidsfiles),
-                      component.available_ratings, row_tpl)
-
-
 def make_rowname(rowtpl, entities):
     keys = {k: v for k, v in entities.items() if k in rowtpl.entities}
     return rowtpl.tpl.substitute(keys)
 
 
-def make_database(entities, available_ratings, row_tpl):
-    '''
-    Create database
-    '''
+def make_database(db, entities, available_ratings, row_tpl):
+    """
+    Add tables and data to database
+    """
     # First create necessary tables
     db.create_tables([Component, Rating, Entity, Image, TableRow, TableColumn])
 

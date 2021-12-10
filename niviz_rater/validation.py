@@ -5,7 +5,7 @@ import yamale
 from yamale.validators import DefaultValidators, Validator
 from bids.config import get_option
 
-SCHEMAFILE = os.path.join(os.path.dirname(__file__), 'data/schema.yaml')
+SCHEMAFILE: str = os.path.join(os.path.dirname(__file__), 'data/schema.yaml')
 
 
 def load_json(file):
@@ -26,9 +26,9 @@ def get_entities():
 
 
 class Entities(Validator):
-    '''
+    """
     Class to enable validation of BIDS entities
-    '''
+    """
 
     tag = 'Entities'
 

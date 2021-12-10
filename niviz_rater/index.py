@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from collections import namedtuple
 
 from bids.layout import BIDSLayout, add_config_paths
-
+from niviz.validation import validate_config
 from niviz_rater import db
 from niviz_rater.models import Entity, Rating, Image, Component, TableRow, TableColumn
 

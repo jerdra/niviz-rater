@@ -17,9 +17,11 @@ npm install
 
 ## Run
 
-To run the bottle application:
+To run the bottle application, first initialize the database, 
+then run the Web Interface
 ```bash
-python app.py 
+python app.py initialize_db
+python app.py runserver
 ```
 
 To run the svelte application in development mode:

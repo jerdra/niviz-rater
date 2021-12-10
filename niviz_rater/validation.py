@@ -44,9 +44,9 @@ def _configure_entity_validator(bids_configs):
     to validate against
     '''
 
-    PatchedEntities = Entities
-    PatchedEntities.valid_configs = bids_configs
-    return PatchedEntities
+    ConfiguredEntities = Entities
+    ConfiguredEntities.valid_configs = bids_configs
+    return ConfiguredEntities
 
 
 def validate_config(config, bids_configs, schema_file=SCHEMAFILE):
@@ -68,9 +68,9 @@ def validate_config(config, bids_configs, schema_file=SCHEMAFILE):
         YamaleError: If validation fails due to invalid `config` file
     '''
 
-    PatchedEntities = _configure_entity_validator(bids_configs)
+    ConfiguredEntities = _configure_entity_validator(bids_configs)
     validators = DefaultValidators.copy()
-    validators[Entities.tag] = PatchedEntities
+    validators[ConfiguredEntities.tag] = ConfiguredEntities
 
     schema = yamale.make_schema(schema_file, validators=validators)
     yamaledata = yamale.make_data(config)

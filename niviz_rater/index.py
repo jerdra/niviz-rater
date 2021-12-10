@@ -107,11 +107,6 @@ class ConfigComponent:
         return qc_entities
 
 
-def make_rowname(rowtpl, entities):
-    keys = {k: v for k, v in entities.items() if k in rowtpl.entities}
-    return rowtpl.tpl.substitute(keys)
-
-
 def build_index(db: SqliteDatabase,
                 bids_files: Iterable[str],
                 qc_spec: Dict[str, Any]) -> None:
@@ -127,6 +122,11 @@ def build_index(db: SqliteDatabase,
                       component.build_qc_entities(bids_files),
                       component.available_ratings,
                       row_tpl)
+
+
+def make_rowname(rowtpl, entities):
+    keys = {k: v for k, v in entities.items() if k in rowtpl.entities}
+    return rowtpl.tpl.substitute(keys)
 
 
 def make_database(db, entities, available_ratings, row_tpl):

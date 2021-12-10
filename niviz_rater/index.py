@@ -120,7 +120,6 @@ def build_index(qc_dataset, qc_config, bids_config=None):
 
     if bids_config is None:
         bids_config = DEFAULT_BIDS
-        print(DEFAULT_BIDS)
 
     add_config_paths(user=bids_config)
     bids_configs = bids.config.get_option('config_paths').values()

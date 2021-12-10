@@ -28,7 +28,7 @@ class Entities(Validator):
         property set
     '''
 
-    __slots__ = "valid_configs"
+    __slots__ = 'valid_configs'
 
     tag = 'Entities'
 

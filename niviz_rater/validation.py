@@ -19,7 +19,7 @@ def get_entities():
         load_json(file)['entities']
         for file in get_option('config_paths').values()
     ]
-    enumstrs = list()
+    enumstrs = []
     for configfile in configfiles:
         enumstr = [x['name'] for x in configfile]
         enumstrs.append(enumstr)

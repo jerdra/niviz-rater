@@ -1,20 +1,16 @@
 import os
 import yaml
-import json
 import yamale
 from yamale.validators import DefaultValidators, Validator
+import niviz_rater.utils as utils
 
 SCHEMAFILE = os.path.join(os.path.dirname(__file__), 'data/schema.yaml')
 
 
-def _load_json(file):
-    with open(file, 'r') as f:
-        result = json.load(f)
-    return result
-
-
-def _get_valid_entities(config_files):
-    valid_configs = [_load_json(file)['entities'] for file in config_files]
+def _get_valid_entities(bids_config_files):
+    valid_configs = [
+        utils.load_json(file)['entities'] for file in bids_config_files
+    ]
     enumstrs = []
     for configfile in valid_configs:
         enumstrs.extend([entity['name'] for entity in configfile])
@@ -25,11 +21,31 @@ class Entities(Validator):
     '''
     Class to enable validation of BIDS entities
     from pyBIDS JSON configuration files
+
+    Note:
+        This class cannot be used in isolation. Instead
+        create a copy of the class with the `valid_configs`
+        property set
     '''
 
     __slots__ = "valid_configs"
 
     tag = 'Entities'
+
+    def __init__(self, *args, **kwargs):
+        '''
+        Perform a check to ensure that `valid_configs` is
+        defined
+
+        Raises:
+            AttributeError: If `valid_configs` is not defined
+        '''
+
+        if self.valid_configs is None:
+            raise AttributeError('`valid_configs` property of Entities '
+                                 'class is not set. Create copy of class '
+                                 'and set `valid_configs`!')
+        super(Entities, self).__init__(*args, **kwargs)
 
     def _is_valid(self, value):
         return value in _get_valid_entities(self.valid_configs)

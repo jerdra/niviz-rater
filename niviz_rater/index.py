@@ -3,7 +3,6 @@ Module for handling and enforcing configuration rules for
 packaging and rules for associating QC images with an entity
 """
 
-import os
 from itertools import groupby
 import logging
 from string import Template
@@ -13,11 +12,6 @@ from typing import Iterable, Dict, Any
 
 from peewee import SqliteDatabase
 
-from bids.layout import BIDSLayout, add_config_paths
-import bids.config
-
-from niviz_rater.validation import validate_config
-from niviz_rater import db
 from niviz_rater.models import (Entity, Rating, Image, Component, TableRow,
                                 TableColumn)
 

@@ -122,9 +122,9 @@ def main():
 
     args = parser.parse_args()
     app.config['niviz_rater.base_path'] = args.base_directory
+    bids_configs = update_bids_configuration(args.bids_settings)
 
-    qc_spec = validate_config(args.qc_specification_file)
-    update_bids_configuration(args.bids_settings)
+    qc_spec = validate_config(args.qc_specification_file, bids_configs)
     bids_files = get_qc_bidsfiles(args.base_directory, qc_spec)
     args.qc_spec = qc_spec
     args.bids_files = bids_files

@@ -34,7 +34,7 @@ class Entities(Validator):
         return value in get_entities()
 
 
-def _validate_config(config):
+def validate_config(config):
 
     validators = DefaultValidators.copy()
     validators[Entities.tag] = Entities

@@ -1,11 +1,11 @@
 import json
 import logging
 import os
-import yaml
-import yamale
+from typing import List
 
-from typing import Optional, List, Dict, Any
 from bids.layout import BIDSLayout, add_config_paths
+
+DEFAULT_BIDS_FILE = os.path.join(os.path.dirname(__file__), 'data/bids.json')
 
 
 def load_json(file):

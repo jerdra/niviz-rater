@@ -8,6 +8,9 @@ import logging
 from string import Template
 from dataclasses import dataclass
 from collections import namedtuple
+from typing import Iterable, Dict, Any
+
+from peewee import SqliteDatabase
 
 from niviz_rater.models import Entity, Rating, Image, Component, TableRow, TableColumn
 
@@ -107,6 +110,23 @@ class ConfigComponent:
 def make_rowname(rowtpl, entities):
     keys = {k: v for k, v in entities.items() if k in rowtpl.entities}
     return rowtpl.tpl.substitute(keys)
+
+
+def build_index(db: SqliteDatabase,
+                bids_files: Iterable[str],
+                qc_spec: Dict[str, Any]) -> None:
+    """
+    Initialize database with objects
+    """
+    row_tpl = AxisNameTpl(Template(qc_spec['RowDescription']['name']),
+                          qc_spec['RowDescription']['entities'])
+
+    for c in qc_spec['Components']:
+        component = ConfigComponent(**c)
+        make_database(db,
+                      component.build_qc_entities(bids_files),
+                      component.available_ratings,
+                      row_tpl)
 
 
 def make_database(db, entities, available_ratings, row_tpl):

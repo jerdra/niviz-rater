@@ -1,11 +1,12 @@
-'''
+"""
 API for accessing and updating stored QC Index
-'''
+"""
 
 import os
 from bottle import route, Bottle, request, response
+
+from niviz_rater.db import get_or_create_db
 from niviz_rater.models import (Entity, Image, TableRow, TableColumn, Rating)
-from niviz_rater import db
 import logging
 from peewee import JOIN, prefetch
 
@@ -14,9 +15,9 @@ logger = logging.getLogger(__file__)
 
 
 def _fileserver(path, app_config):
-    '''
+    """
     Transform local directory path to fileserver path
-    '''
+    """
 
     base = app_config['niviz_rater.base_path']
     address = app_config['niviz_rater.fileserver']
@@ -32,13 +33,13 @@ def _rating(rating):
 
 @route('/api/overview')
 def summary():
-    '''
+    """
     Pull summary information from index, yield:
         - rows of entity index
         - qc items per row entity of index
         - remaining un-rated images
         - total number of ratings required
-    '''
+    """
     n_unrated = (Entity.select(Entity.failed).where(
         Entity.failed.is_null()).count())
     logger.info(f"Number of unrated scans is: {n_unrated}")
@@ -56,11 +57,11 @@ def summary():
 
 @route('/api/spreadsheet')
 def spreadsheet():
-    '''
+    """
     Query database for information required to construct
     interactive table, yields for each TableRow it's
     set of entities
-    '''
+    """
 
     q = (Entity.select(Entity).join(TableRow).switch(Entity).join(
         TableColumn).switch(Entity).prefetch(Image))
@@ -116,14 +117,14 @@ def get_entity_info(entity_id):
 
 @route('/api/entity/<entity_id:int>/view')
 def get_entity_view(entity_id):
-    '''
+    """
     Retrieve full information for entity
     Yields:
         entity name
         array of entity image paths
         available ratings
         current rating for a given entity
-    '''
+    """
 
     entity = Entity.select().where(Entity.id == entity_id).first()
     images = Image.select(Image,
@@ -149,12 +150,12 @@ def get_entity_view(entity_id):
 
 @route('/api/entity', method='POST')
 def update_rating():
-    '''
+    """
     Post body should contain information about:
         -   rating_id
         -   comment
         -   qc_rating
-    '''
+    """
     expected_keys = {'rating', 'comment', 'failed'}
     data = request.json
     if data is None:
@@ -170,6 +171,7 @@ def update_rating():
     logger.info(data)
 
     # Update entity with available keys
+    db = get_or_create_db()
     with db.atomic():
         for k in update_keys:
             setattr(entity, k, data[k])
@@ -182,9 +184,9 @@ def update_rating():
 
 @route("/api/export")
 def export_csv():
-    '''
+    """
     Export participants.tsv CSV file
-    '''
+    """
 
     entities = (
         Entity
@@ -208,24 +210,24 @@ def export_csv():
 
 
 def _make_row(row, columns):
-    '''
+    """
     Given a set of Entities for a given row, create
     column entries
-    '''
+    """
     p = 0
     entities = row.entities
     entries = [row.name]
-    EMPTY = ("", "", "")
+    empty = ("", "", "")
     for c in columns:
         try:
             e = entities[p]
+            if e.columnname == c:
+                entries.extend(e.entry)
+                p += 1
+            else:
+                entries.extend(empty)
         except IndexError:
-            entries.extend(EMPTY)
+            entries.extend(empty)
 
-        if e.columnname == c:
-            entries.extend(e.entry)
-            p += 1
-        else:
-            entries.extend(EMPTY)
     return "\t".join(entries)
 

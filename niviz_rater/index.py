@@ -1,7 +1,7 @@
-'''
+"""
 Module for handling and enforcing configuration rules for
 packaging and rules for associating QC images with an entity
-'''
+"""
 
 import os
 from itertools import groupby
@@ -20,16 +20,14 @@ from niviz_rater.models import (Entity, Rating, Image, Component, TableRow,
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_BIDS = os.path.join(os.path.dirname(__file__), 'data/bids.json')
-
 AxisNameTpl = namedtuple('AxisNameTpl', ('tpl', 'entities'))
 
 
 @dataclass
 class QCEntity:
-    '''
+    """
     Helper class to represent a single QC entity
-    '''
+    """
     images: list
     entities: dict
     tpl_name: str
@@ -45,10 +43,10 @@ class QCEntity:
 
 
 class ConfigComponent:
-    '''
+    """
     Configurable Factory class for building QC components
     from list of images
-    '''
+    """
     def __init__(self, entities, name, column, images, ratings):
         self.entities = entities
         self.name = name
@@ -57,9 +55,9 @@ class ConfigComponent:
         self.available_ratings = ratings
 
     def _group_by_entities(self, bidsfiles):
-        '''
+        """
         Sort list of bidsfiles by requested entities
-        '''
+        """
 
         filtered = [
             b for b in bidsfiles if all(k in b.entities for k in self.entities)
@@ -84,13 +82,13 @@ class ConfigComponent:
         return matches[0]
 
     def build_qc_entities(self, image_list):
-        '''
+        """
         Build QC Entities given a list of images
 
         Arguments:
             image_list          List of BIDSFile images
                                 to build QC entities from
-        '''
+        """
 
         qc_entities = []
 
@@ -146,10 +144,10 @@ def make_rowname(rowtpl, entities):
     return rowtpl.tpl.substitute(keys)
 
 
-def make_database(entities, available_ratings, row_tpl):
-    '''
-    Create database
-    '''
+def make_database(db, entities, available_ratings, row_tpl):
+    """
+    Add tables and data to database
+    """
     # First create necessary tables
     db.create_tables([Component, Rating, Entity, Image, TableRow, TableColumn])
 

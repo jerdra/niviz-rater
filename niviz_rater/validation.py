@@ -65,13 +65,13 @@ def _configure_entity_validator(bids_configs):
     return ConfiguredEntities
 
 
-def validate_config(config, bids_configs, schema_file=SCHEMAFILE):
+def validate_config(qc_spec_config, bids_configs, schema_file=SCHEMAFILE):
     """
     Validate a YAML-based configuration file against a
     schema file containing BIDS entity constraints
 
     Args:
-        config (str): Path to YAML configuration file to be validated
+        qc_spec_config (str): Path to YAML configuration file to be validated
         bids_configs (:obj: `list` of :obj: `str): List of paths to pyBIDS
             configuration files to include in validation
         schema_file (str): Path to YAML schema to validate against. Defaults
@@ -89,10 +89,10 @@ def validate_config(config, bids_configs, schema_file=SCHEMAFILE):
     validators[ConfiguredEntities.tag] = ConfiguredEntities
 
     schema = yamale.make_schema(schema_file, validators=validators)
-    yamaledata = yamale.make_data(config)
+    yamaledata = yamale.make_data(qc_spec_config)
     yamale.validate(schema, yamaledata)
 
-    with open(config, 'r') as f:
+    with open(qc_spec_config, 'r') as f:
         config = yaml.load(f, Loader=yaml.CLoader)
 
     return config

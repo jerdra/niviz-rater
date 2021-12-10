@@ -114,39 +114,6 @@ class ConfigComponent:
         return qc_entities
 
 
-def build_index(qc_dataset, qc_config, bids_config=None):
-    '''
-    Build database
-    '''
-
-    if bids_config is None:
-        bids_config = DEFAULT_BIDS
-
-    add_config_paths(user=bids_config)
-    bids_configs = bids.config.get_option('config_paths').values()
-
-    config = validate_config(qc_config, bids_configs)
-    layout = BIDSLayout(qc_dataset,
-                        validate=False,
-                        index_metadata=False,
-                        config=["user"])
-
-    bidsfiles = layout.get(extension=config['ImageExtensions'])
-
-    row_tpl = AxisNameTpl(Template(config['RowDescription']['name']),
-                          config['RowDescription']['entities'])
-
-    for c in config['Components']:
-        component = ConfigComponent(**c)
-        make_database(component.build_qc_entities(bidsfiles),
-                      component.available_ratings, row_tpl)
-
-
-def make_rowname(rowtpl, entities):
-    keys = {k: v for k, v in entities.items() if k in rowtpl.entities}
-    return rowtpl.tpl.substitute(keys)
-
-
 def build_index(db: SqliteDatabase,
                 bids_files: Iterable[str],
                 qc_spec: Dict[str, Any]) -> None:
@@ -162,6 +129,11 @@ def build_index(db: SqliteDatabase,
                       component.build_qc_entities(bids_files),
                       component.available_ratings,
                       row_tpl)
+
+
+def make_rowname(rowtpl, entities):
+    keys = {k: v for k, v in entities.items() if k in rowtpl.entities}
+    return rowtpl.tpl.substitute(keys)
 
 
 def make_database(db, entities, available_ratings, row_tpl):

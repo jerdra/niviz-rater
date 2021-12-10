@@ -40,7 +40,6 @@ def _validate_config(config):
     validators[Entities.tag] = Entities
 
     schema = yamale.make_schema(SCHEMAFILE, validators=validators)
-
     yamaledata = yamale.make_data(config)
 
     yamale.validate(schema, yamaledata)

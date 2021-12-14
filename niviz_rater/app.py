@@ -1,3 +1,5 @@
+from typing import Iterable, Any, Dict
+
 from bottle import route, run, static_file, debug, default_app
 
 import os
@@ -9,8 +11,11 @@ from http.server import HTTPServer, SimpleHTTPRequestHandler
 from threading import Thread
 from functools import partial
 
-from niviz_rater.index import build_index
 from niviz_rater.api import apiRoutes
+from niviz_rater.db import get_or_create_db
+from niviz_rater.index import build_index
+from niviz_rater.utils import get_qc_bidsfiles, update_bids_configuration
+from niviz_rater.validation import validate_config
 
 logger = logging.getLogger(__file__)
 
@@ -35,9 +40,9 @@ def user_path():
 
 
 def launch_fileserver(base_directory, port=5002, hostname='localhost'):
-    '''
+    """
     Launch background TCP server at `base_directory`
-    '''
+    """
     path = os.path.abspath(base_directory)
     handler = partial(SimpleHTTPRequestHandler, directory=path)
     httpd = HTTPServer((hostname, port), handler)
@@ -49,54 +54,81 @@ def launch_fileserver(base_directory, port=5002, hostname='localhost'):
             logger.info(f"Creating server at {port}")
             httpd.serve_forever()
 
-    thread = Thread(target=serve, args=(httpd, ))
+    thread = Thread(target=serve, args=(httpd,))
     thread.setDaemon(True)
     thread.start()
 
     return httpd, address
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="QC Application to perform"
-        " quality control on Niviz-generated or BIDS organized QC images")
-
-    parser.add_argument("base_directory",
-                        type=Path,
-                        help="Base directory of BIDS-organized QC directory")
-    parser.add_argument("qc_settings",
-                        type=Path,
-                        help="Path to QC rating specification to use"
-                        " when rating images")
-    parser.add_argument("--bids-settings",
-                        type=Path,
-                        help="Path to pyBIDS configuration json")
-    parser.add_argument("--port",
-                        type=int,
-                        help="Port to use to open server",
-                        default=5000)
-    parser.add_argument("--fileserver-port",
-                        type=int,
-                        help="Port to use for serving local image files",
-                        default=5001)
-    parser.add_argument("--use-existing-index",
-                        type=Path,
-                        help="Use an existing database file")
-
-    args = parser.parse_args()
-    app.config['niviz_rater.base_path'] = args.base_directory
-
+def initialize_db(qc_spec: Dict[str, Any], bids_files: Iterable[str]) -> None:
+    db = get_or_create_db()
     logging.info("Building Index of QC images")
-    if not args.use_existing_index:
-        build_index(args.base_directory, args.qc_settings, args.bids_settings)
+    build_index(db, bids_files, qc_spec)
 
-    _, address = launch_fileserver(args.base_directory,
-                                   port=args.fileserver_port)
+
+def update_db(db_name, base_directory, qc_settings, bids_settings):
+    raise NotImplementedError()
+
+
+def runserver(base_directory, fileserver_port, port):
+    _, address = launch_fileserver(base_directory,
+                                   port=fileserver_port)
     app.config['niviz_rater.fileserver'] = address
 
     app.merge(apiRoutes)
     debug(True)
-    run(host='localhost', port=args.port)
+    run(host='localhost', port=port)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="QC Application to perform"
+                    " quality control on Niviz-generated or BIDS organized QC images")
+    parser.add_argument("--base-directory",
+                        "-i",
+                        type=Path,
+                        required=True,
+                        help="Base directory of BIDS-organized QC directory")
+    parser.add_argument("--qc-specification-file",
+                        "-c",
+                        type=Path,
+                        required=True,
+                        help="Path to QC rating specification file to use"
+                             " when rating images")
+    parser.add_argument("--bids-settings",
+                        type=Path,
+                        help="Path to pyBIDS configuration json")
+    subparsers = parser.add_subparsers(help='sub-command help')
+    create_db_parser = subparsers.add_parser('initialize_db',
+                                             help='Initialize database')
+    update_db_parser = subparsers.add_parser('update_db',
+                                             help='Update database')
+    runserver_parser = subparsers.add_parser('runserver',
+                                             help='Run bottle web interface')
+
+    create_db_parser.set_defaults(func=initialize_db)
+    update_db_parser.set_defaults(func=update_db)
+    runserver_parser.set_defaults(func=runserver)
+
+    runserver_parser.add_argument("--port",
+                                  type=int,
+                                  help="Port to use to open server",
+                                  default=5000)
+    runserver_parser.add_argument("--fileserver-port",
+                                  type=int,
+                                  help="Port to use for serving local image files",
+                                  default=5001)
+
+    args = parser.parse_args()
+    app.config['niviz_rater.base_path'] = args.base_directory
+    bids_configs = update_bids_configuration(args.bids_settings)
+
+    qc_spec = validate_config(args.qc_specification_file, bids_configs)
+    bids_files = get_qc_bidsfiles(args.base_directory, qc_spec)
+    args.qc_spec = qc_spec
+    args.bids_files = bids_files
+    args.func(args)
 
 
 if __name__ == '__main__':

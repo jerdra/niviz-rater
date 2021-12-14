@@ -4,7 +4,7 @@ import yamale
 from yamale.validators import DefaultValidators, Validator
 import niviz_rater.utils as utils
 
-SCHEMAFILE = os.path.join(os.path.dirname(__file__), 'data/schema.yaml')
+SCHEMAFILE: str = os.path.join(os.path.dirname(__file__), 'data/schema.yaml')
 
 
 def _get_valid_entities(bids_config_files):
@@ -18,7 +18,7 @@ def _get_valid_entities(bids_config_files):
 
 
 class Entities(Validator):
-    '''
+    """
     Class to enable validation of BIDS entities
     from pyBIDS JSON configuration files
 
@@ -26,20 +26,20 @@ class Entities(Validator):
         This class cannot be used in isolation. Instead
         create a copy of the class with the `valid_configs`
         property set
-    '''
+    """
 
     __slots__ = 'valid_configs'
 
     tag = 'Entities'
 
     def __init__(self, *args, **kwargs):
-        '''
+        """
         Perform a check to ensure that `valid_configs` is
         defined
 
         Raises:
             AttributeError: If `valid_configs` is not defined
-        '''
+        """
 
         if self.valid_configs is None:
             raise AttributeError('`valid_configs` property of Entities '
@@ -52,26 +52,26 @@ class Entities(Validator):
 
 
 def _configure_entity_validator(bids_configs):
-    '''
+    """
     A little hack to work around Yamale requiring statically
     defined classes for validation.
 
     Dynamically the set of BIDS JSON configuration files
     to validate against
-    '''
+    """
 
     ConfiguredEntities = Entities
     ConfiguredEntities.valid_configs = bids_configs
     return ConfiguredEntities
 
 
-def validate_config(config, bids_configs, schema_file=SCHEMAFILE):
-    '''
+def validate_config(qc_spec_config, bids_configs, schema_file=SCHEMAFILE):
+    """
     Validate a YAML-based configuration file against a
     schema file containing BIDS entity constraints
 
     Args:
-        config (str): Path to YAML configuration file to be validated
+        qc_spec_config (str): Path to YAML configuration file to be validated
         bids_configs (:obj: `list` of :obj: `str): List of paths to pyBIDS
             configuration files to include in validation
         schema_file (str): Path to YAML schema to validate against. Defaults
@@ -82,17 +82,17 @@ def validate_config(config, bids_configs, schema_file=SCHEMAFILE):
 
     Raises:
         YamaleError: If validation fails due to invalid `config` file
-    '''
+    """
 
     ConfiguredEntities = _configure_entity_validator(bids_configs)
     validators = DefaultValidators.copy()
     validators[ConfiguredEntities.tag] = ConfiguredEntities
 
     schema = yamale.make_schema(schema_file, validators=validators)
-    yamaledata = yamale.make_data(config)
+    yamaledata = yamale.make_data(qc_spec_config)
     yamale.validate(schema, yamaledata)
 
-    with open(config, 'r') as f:
+    with open(qc_spec_config, 'r') as f:
         config = yaml.load(f, Loader=yaml.CLoader)
 
     return config

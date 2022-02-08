@@ -1,0 +1,40 @@
+# Each row of participants.tsv will be a unique combination of the following
+RowEntities: [subject]
+ImageExtensions: ["png", "svg", "jpeg", "jpg", "svg"]
+
+RowDescription:
+  entities: [subject]
+  name: "${subject}"
+
+Components:
+  - entities: [subject]
+    name: "${subject} lorem1"
+    column: "A"
+    images:
+      - {description: lorem1}
+    ratings:
+      - Terrible 
+      - Bad
+      - Alright
+      - Good
+      - Excellent
+
+  - entities: [subject]
+    name: "${subject} lorem2-3"
+    column: "BC"
+    images:
+      - {description: lorem2}
+      - {description: lorem3}
+    ratings:
+      - Good
+      - Bad
+
+  - entities: [subject]
+    name: "${subject} lorem4-5"
+    column: "DE"
+    images:
+      - {description: lorem4}
+      - {description: lorem5}
+    ratings:
+      - Good
+      - Terrible

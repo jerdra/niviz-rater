@@ -15,6 +15,7 @@ from niviz_rater.api import apiRoutes
 from niviz_rater.db import get_or_create_db
 from niviz_rater.index import build_index
 from niviz_rater.utils import get_qc_bidsfiles, update_bids_configuration
+
 from niviz_rater.validation import validate_config
 
 logger = logging.getLogger(__file__)
@@ -54,7 +55,7 @@ def launch_fileserver(base_directory, port=5002, hostname='localhost'):
             logger.info(f"Creating server at {port}")
             httpd.serve_forever()
 
-    thread = Thread(target=serve, args=(httpd,))
+    thread = Thread(target=serve, args=(httpd, ))
     thread.setDaemon(True)
     thread.start()
 
@@ -72,8 +73,7 @@ def update_db(db_name, base_directory, qc_settings, bids_settings):
 
 
 def runserver(base_directory, fileserver_port, port):
-    _, address = launch_fileserver(base_directory,
-                                   port=fileserver_port)
+    _, address = launch_fileserver(base_directory, port=fileserver_port)
     app.config['niviz_rater.fileserver'] = address
 
     app.merge(apiRoutes)
@@ -84,7 +84,7 @@ def runserver(base_directory, fileserver_port, port):
 def main():
     parser = argparse.ArgumentParser(
         description="QC Application to perform"
-                    " quality control on Niviz-generated or BIDS organized QC images")
+        " quality control on Niviz-generated or BIDS organized QC images")
     parser.add_argument("--base-directory",
                         "-i",
                         type=Path,
@@ -95,10 +95,12 @@ def main():
                         type=Path,
                         required=True,
                         help="Path to QC rating specification file to use"
-                             " when rating images")
-    parser.add_argument("--bids-settings",
-                        type=Path,
-                        help="Path to pyBIDS configuration json")
+                        " when rating images")
+    parser.add_argument(
+        "--bids-settings",
+        type=Path,
+        help="Path to pyBIDS configuration json",
+    )
     subparsers = parser.add_subparsers(help='sub-command help')
     create_db_parser = subparsers.add_parser('initialize_db',
                                              help='Initialize database')
@@ -115,10 +117,11 @@ def main():
                                   type=int,
                                   help="Port to use to open server",
                                   default=5000)
-    runserver_parser.add_argument("--fileserver-port",
-                                  type=int,
-                                  help="Port to use for serving local image files",
-                                  default=5001)
+    runserver_parser.add_argument(
+        "--fileserver-port",
+        type=int,
+        help="Port to use for serving local image files",
+        default=5001)
 
     args = parser.parse_args()
     app.config['niviz_rater.base_path'] = args.base_directory

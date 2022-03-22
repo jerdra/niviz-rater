@@ -68,15 +68,18 @@ class ConfigComponent:
         matches = [
             b for b in images if _is_subdict(b.entities, image_descriptor)
         ]
-        if len(matches) != 1:
+        if len(matches) > 1:
             logger.error(f"Got {len(matches)} matches to entity,"
                          " expected 1!")
             logger.error(f"Matching specification:\n {image_descriptor}")
             print_matches = "\n".join([m.path for m in matches])
-            if len(matches) > 1:
-                logger.error(f"Found:\n {print_matches}")
             raise ValueError
-        return matches[0]
+
+        try:
+            return matches[0]
+        except IndexError:
+            logger.error(f"Found 0 matches for\n {image_descriptor}!")
+            return
 
     def build_qc_entities(self, image_list):
         """
@@ -96,14 +99,17 @@ class ConfigComponent:
                 for i in self.image_descriptors
             ]
 
-            qc_entities.append(
-                QCEntity(images=[m.path for m in matched_images],
-                         entities={
-                             k: matched_images[0].entities[k]
-                             for k in self.entities
-                         },
-                         tpl_name=self.name,
-                         tpl_column_name=self.column))
+            # Remove missing data
+            matched_images = [m for m in matched_images if m is not None]
+            if matched_images:
+                qc_entities.append(
+                    QCEntity(images=[m.path for m in matched_images],
+                             entities={
+                                 k: matched_images[0].entities[k]
+                                 for k in self.entities
+                             },
+                             tpl_name=self.name,
+                             tpl_column_name=self.column))
 
         return qc_entities
 

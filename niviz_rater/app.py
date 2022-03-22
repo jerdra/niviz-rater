@@ -1,10 +1,11 @@
-from typing import Iterable, Any, Dict
+from typing import Iterable, Any, Dict, Callable
 
 from bottle import route, run, static_file, debug, default_app
 
 import os
 import argparse
 import logging
+import inspect
 from pathlib import Path
 
 from http.server import HTTPServer, SimpleHTTPRequestHandler
@@ -21,6 +22,8 @@ from niviz_rater.validation import validate_config
 logger = logging.getLogger(__file__)
 
 app = default_app()
+
+DEFAULT_BIDS_CONFIGURATION = Path(__file__).parent / "data/bids.json"
 
 
 @route('/')
@@ -62,16 +65,33 @@ def launch_fileserver(base_directory, port=5002, hostname='localhost'):
     return httpd, address
 
 
+def is_subcommand(func: Callable):
+    def _wrapped(args):
+        try:
+            extracted = {
+                e: getattr(args, e)
+                for e in inspect.getfullargspec(func).args
+            }
+        except AttributeError:
+            raise
+        else:
+            return func(**extracted)
+    return _wrapped
+
+
+@is_subcommand
 def initialize_db(qc_spec: Dict[str, Any], bids_files: Iterable[str]) -> None:
     db = get_or_create_db()
     logging.info("Building Index of QC images")
     build_index(db, bids_files, qc_spec)
 
 
+@is_subcommand
 def update_db(db_name, base_directory, qc_settings, bids_settings):
     raise NotImplementedError()
 
 
+@is_subcommand
 def runserver(base_directory, fileserver_port, port):
     _, address = launch_fileserver(base_directory, port=fileserver_port)
     app.config['niviz_rater.fileserver'] = address
@@ -96,11 +116,10 @@ def main():
                         required=True,
                         help="Path to QC rating specification file to use"
                         " when rating images")
-    parser.add_argument(
-        "--bids-settings",
-        type=Path,
-        help="Path to pyBIDS configuration json",
-    )
+    parser.add_argument("--bids-settings",
+                        type=Path,
+                        default=DEFAULT_BIDS_CONFIGURATION,
+                        help="Path to pyBIDS configuration json")
     subparsers = parser.add_subparsers(help='sub-command help')
     create_db_parser = subparsers.add_parser('initialize_db',
                                              help='Initialize database')

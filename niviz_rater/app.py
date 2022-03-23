@@ -23,17 +23,18 @@ logger = logging.getLogger(__file__)
 
 app = default_app()
 
-DEFAULT_BIDS_CONFIGURATION = Path(__file__).parent / "data/bids.json"
+FILE = Path(__file__).parent
+DEFAULT_BIDS_CONFIGURATION = FILE / "data/bids.json"
 
 
 @route('/')
 def index():
-    return static_file("index.html", root="./client/public/")
+    return static_file("index.html", root=FILE / "client/public/")
 
 
 @route('/<path:path>')
 def home(path):
-    return static_file(path, root="./client/public")
+    return static_file(path, root=FILE / "client/public")
 
 
 # Route to store user path

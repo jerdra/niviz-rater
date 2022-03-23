@@ -53,7 +53,7 @@ export default {
 
 		}),
 		postcss({
-			extract: false,
+			extract: true,
 			minimize: true,
 			use: [
 				[
@@ -69,7 +69,7 @@ export default {
 		}),
 		// we'll extract any component CSS out into
 		// a separate file - better for performance
-		css({ output: 'bundle.css' }),
+		css({ output: 'extras.css' }),
 
 		// If you have external dependencies installed from
 		// npm, you'll most likely need these plugins. In

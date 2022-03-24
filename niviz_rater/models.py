@@ -1,10 +1,11 @@
-from peewee import (Model, ForeignKeyField, TextField, CharField, BooleanField)
-from niviz_rater.db import get_or_create_db
+from peewee import (Model, ForeignKeyField, TextField, CharField, BooleanField, DatabaseProxy)
+
+database_proxy = DatabaseProxy()
 
 
 class BaseModel(Model):
     class Meta:
-        database = get_or_create_db()
+        database = database_proxy
 
 
 class Component(BaseModel):
@@ -42,7 +43,7 @@ class Entity(Model):
     rating = ForeignKeyField(Rating, null=True, backref='+')
 
     class Meta:
-        database = get_or_create_db()
+        database = database_proxy
         indexes = ((("name", ), True), )
 
     @property

@@ -13,11 +13,13 @@ from threading import Thread
 from functools import partial
 
 from niviz_rater.api import apiRoutes
-from niviz_rater.db import get_or_create_db
+from niviz_rater.db import fetch_db_from_config
 from niviz_rater.index import build_index
 from niviz_rater.utils import get_qc_bidsfiles, update_bids_configuration
 
 from niviz_rater.validation import validate_config
+
+from niviz_rater.models import database_proxy
 
 logger = logging.getLogger(__file__)
 
@@ -25,6 +27,22 @@ app = default_app()
 
 FILE = Path(__file__).parent
 DEFAULT_BIDS_CONFIGURATION = FILE / "data/bids.json"
+
+
+def is_subcommand(func: Callable):
+
+    def _wrapped(args):
+        try:
+            extracted = {
+                e: getattr(args, e)
+                for e in inspect.getfullargspec(func).args
+            }
+        except AttributeError:
+            raise
+        else:
+            return func(**extracted)
+
+    return _wrapped
 
 
 @route('/')
@@ -66,23 +84,10 @@ def launch_fileserver(base_directory, port=5002, hostname='localhost'):
     return httpd, address
 
 
-def is_subcommand(func: Callable):
-    def _wrapped(args):
-        try:
-            extracted = {
-                e: getattr(args, e)
-                for e in inspect.getfullargspec(func).args
-            }
-        except AttributeError:
-            raise
-        else:
-            return func(**extracted)
-    return _wrapped
-
-
 @is_subcommand
 def initialize_db(qc_spec: Dict[str, Any], bids_files: Iterable[str]) -> None:
-    db = get_or_create_db()
+
+    db = fetch_db_from_config(app.config)
     logging.info("Building Index of QC images")
     build_index(db, bids_files, qc_spec)
 
@@ -93,7 +98,7 @@ def update_db(db_name, base_directory, qc_settings, bids_settings):
 
 
 @is_subcommand
-def runserver(base_directory, fileserver_port, port):
+def runserver(base_directory: str, fileserver_port: int, port: int):
     _, address = launch_fileserver(base_directory, port=fileserver_port)
     app.config['niviz_rater.fileserver'] = address
 
@@ -121,6 +126,13 @@ def main():
                         type=Path,
                         default=DEFAULT_BIDS_CONFIGURATION,
                         help="Path to pyBIDS configuration json")
+
+    parser.add_argument("--db-file",
+                        type=Path,
+                        required=False,
+                        default="niviz.db",
+                        help="Path to store SQLite DB containing state")
+
     subparsers = parser.add_subparsers(help='sub-command help')
     create_db_parser = subparsers.add_parser('initialize_db',
                                              help='Initialize database')
@@ -144,11 +156,18 @@ def main():
         default=5001)
 
     args = parser.parse_args()
-    app.config['niviz_rater.base_path'] = args.base_directory
     bids_configs = update_bids_configuration(args.bids_settings)
 
     qc_spec = validate_config(args.qc_specification_file, bids_configs)
     bids_files = get_qc_bidsfiles(args.base_directory, qc_spec)
+
+    # Setup application configuration and DB
+    app.config['niviz_rater.base_path'] = args.base_directory
+    app.config['niviz_rater.db.file'] = args.db_file
+
+    database_proxy.initialize(fetch_db_from_config(app.config))
+    app.config['niviz_rater.db.instance'] = database_proxy
+
     args.qc_spec = qc_spec
     args.bids_files = bids_files
     args.func(args)

@@ -5,7 +5,7 @@ API for accessing and updating stored QC Index
 import os
 from bottle import route, Bottle, request, response
 
-from niviz_rater.db import get_or_create_db
+from niviz_rater.db import fetch_db_from_config
 from niviz_rater.models import (Entity, Image, TableRow, TableColumn, Rating)
 import logging
 from peewee import JOIN, prefetch
@@ -171,7 +171,7 @@ def update_rating():
     logger.info(data)
 
     # Update entity with available keys
-    db = get_or_create_db()
+    db = fetch_db_from_config(request.app.config)
     with db.atomic():
         for k in update_keys:
             setattr(entity, k, data[k])
@@ -188,21 +188,16 @@ def export_csv():
     Export participants.tsv CSV file
     """
 
-    entities = (
-        Entity
-        .select(Entity, TableColumn, Rating)
-        .join(Rating, JOIN.LEFT_OUTER)
-        .switch(Entity).join(TableColumn)
-        .order_by(TableColumn.name)
-    )
+    entities = (Entity.select(Entity, TableColumn, Rating).join(
+        Rating, JOIN.LEFT_OUTER).switch(Entity).join(TableColumn).order_by(
+            TableColumn.name))
     columns = TableColumn.select().order_by(TableColumn.name)
     rows = TableRow.select()
     rows_pf = prefetch(rows, entities)
 
     rows = [_make_row(r, columns) for r in rows_pf]
     header = [
-        f"{c.name}\t{c.name}_passfail\t{c.name}_comment"
-        for c in columns
+        f"{c.name}\t{c.name}_passfail\t{c.name}_comment" for c in columns
     ]
     header = "\t".join(["subjects"] + header)
     csv = "\n".join([header] + rows)
@@ -230,4 +225,3 @@ def _make_row(row, columns):
             entries.extend(empty)
 
     return "\t".join(entries)
-

@@ -1,5 +1,4 @@
 # Each row of participants.tsv will be a unique combination of the following
-RowEntities: [subject]
 ImageExtensions: ["png", "svg", "jpeg", "jpg", "svg"]
 
 RowDescription:

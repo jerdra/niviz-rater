@@ -48,6 +48,12 @@ This will install the `niviz-rater` console script that you can now use to QC yo
 
 ### How to use Niviz-Rater
 
+***
+
+This is a general overview of how you can use NiViz-Rater with your own data. If you want to play with some sample test data check out the `data/` folder where you can generate fake data and try running NiViz-Rater yourself
+
+***
+
 Niviz-Rater was designed to be a flexible application facilitating the quality control and review process for researchers. A result of this flexibility is that the *users need to tell Niviz how they want to rate their images*. Researchers can talk to Niviz-Rater using a `qc-specification-file` which is a YAML file written in a [schema](niviz_rater/data/schema.yaml) that Niviz-Rater understands. In addition, NiViz-Rater expects that the user has their images named using BIDS entities to make the process of fetching files easier.
 
 Looking directly at the [schema](niviz_rater/data/schema.yaml) is a little bit intimidating, instead let's work through an example. Suppose we have a set of QC images in a directory organized as follows:

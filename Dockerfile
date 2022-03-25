@@ -13,13 +13,11 @@ RUN apt-get update \
   && echo "Using NPM Version:" && npm --version
 
 
-COPY . ./niviz-rater
-RUN cd niviz-rater \
-  && pip install -r requirements.txt \
-  && pip install .
-
-WORKDIR ./niviz-rater/niviz_rater/client
-RUN npm run build
-WORKDIR /
+COPY . /niviz-rater
+RUN cd /niviz-rater/niviz_rater/client \
+	&& npm run build \
+	&& cd ../../ \
+	&& pip install -r requirements.txt \
+	&& pip install .
 
 ENTRYPOINT ["niviz-rater"]

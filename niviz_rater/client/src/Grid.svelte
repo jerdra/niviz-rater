@@ -13,8 +13,9 @@
 -->
 <script>
 	import Row from './Row.svelte';
-	import { groupSpec, groupedEntities } from './store.js';
-	import { groupBy } from './utils.js';
+  import Entity from './Entity.svelte';
+
+	export let groupedEntities;
 
 	let rowKeys = [];
 	let rows;
@@ -24,10 +25,16 @@
 </script>
 
 <div class="block">
+
 	{#each rowKeys as row}
-			<Row on:message 
-		rowName={row}
-		entities={rows.get(row)}/>
+
+    <Row on:message rowName={row} entities={rows.get(row)}>
+
+        {#each rows.get(row) as entity}
+          <Entity on:message entity={entity}/>
+        {/each}
+
+    </Row>
 	{/each}
 </div>
 

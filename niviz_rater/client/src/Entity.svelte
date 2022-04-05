@@ -1,13 +1,9 @@
 <!--
-	Each entity component represents a single object that is to be
-	QC'd by the user.
-
-	Properties:
-		- Entity: Object storing information on entity that is
-			represented by this view
-		- rating: Rating for entity
-		- pass: 1 if pass, 0 if fail
-		- comment: Current entities comment?
+	Clickable QC tile object that returns its ID
+	Takes an entity containing:
+		- name
+		- failed
+		- id
 -->
 
 <script>
@@ -31,7 +27,6 @@
 		if (e == null){
 			return "column is-2 notification is-dark"
 		}
-
 		let modifier;
 		if (e.failed == true){
 			modifier = "is-danger"

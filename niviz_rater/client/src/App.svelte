@@ -3,17 +3,20 @@
 	as well as display summary information about the QC process
 -->
 <script>
+	import { onMount } from 'svelte';
+	import download from 'downloadjs';
+
+	import Summary from './Summary.svelte';
+	import Grid from './Grid.svelte';
+	import Modal from './Modal.svelte';
+	import { fetchEntities, exportCsv, getEntityView, updateRating } from './db.js';
+	import { entities, entityWheel, groupSpec, groupedEntities } from './store.js';
+
 	import Fa from 'svelte-fa';
 	import { faSave } from '@fortawesome/free-solid-svg-icons';
 	import 'bulma/css/bulma.css';
 	import 'bulma-switch/dist/css/bulma-switch.min.css';
-	import Summary from './Summary.svelte';
-	import Grid from './Grid.svelte';
-	import Modal from './Modal.svelte';
-	import { onMount } from 'svelte';
-	import download from 'downloadjs';
-	import { fetchEntities, exportCsv, getEntityView, updateRating } from './db.js';
-	import { entities, entityWheel, groupSpec } from './store.js';
+
 
 	// INITIALIZATION LOGIC //
 	let summary;
@@ -139,7 +142,7 @@
 </section>
 
 <!-- Wrap in a Modal context -->
-<Grid on:message={handleEntityMessages}/>
+<Grid on:message={handleEntityMessages} groupedEntities={groupedEntities}/>
 
 <!-- Queued modals for viewing should update w/skipRated -->
 {#if displayModal}

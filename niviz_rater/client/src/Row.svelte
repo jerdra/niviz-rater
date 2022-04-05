@@ -10,14 +10,7 @@
 -->
 
 <script>
-	import Entity from './Entity.svelte';
-
-	export let rowName, entities;
-
-	// Should construct key-value mapping of columns to entities
-	let columnEntityMap;
-	$: columnEntityMap = entities.reduce((m, e) => m.set(e.columnName, e), new Map())
-
+	export let rowName;
 </script>
 
 <!-- Row container -->
@@ -27,9 +20,12 @@
 		<div class="column notification is-warning is-12">
 			<strong>{rowName}</strong>
 		</div>
+		<slot> </slot>
+		<!---
 		{#each entities as e}
 			<Entity on:message entity={e}/>
 		{/each}
+		--->
 	</div>
 </div>
 
@@ -38,3 +34,12 @@
 		margin-bottom: 0;
 	}
 </style>
+
+
+<!--
+To break down:
+
+1. Row should just store styling component plus name of row (props)
+2. Slots should be Entity tiles which is passed from parent
+3. Pagination should be handled on two levels with just arrows and a number?
+-->

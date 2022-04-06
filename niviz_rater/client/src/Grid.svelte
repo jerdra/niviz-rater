@@ -31,23 +31,13 @@
 	{#each rowKeys as row}
 
     <Row rowName={row}>
-
         {#each rows.get(row) as entity}
-          <QcTile
-            on:message
-            id={entity.id}
-            label={entity.name}
-            failed={entity.failed} />
+          <QcTile on:message id={entity.id} label={entity.name} failed={entity.failed}/>
         {/each}
-
     </Row>
+
 	{/each}
 
 
 </div>
 
-<style>
-  .is-flex-gap{
-    gap: 0.5rem
-  }
-</style>

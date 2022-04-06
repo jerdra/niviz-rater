@@ -15,7 +15,7 @@
 <!-- Row container -->
 	<!-- This is a container that should contain another container -->
 <div class="block notification is-primary m-5">
-	<div class="columns is-multiline">
+	<div class="columns is-multiline is-flex-gap">
 		<div class="column notification is-warning is-12">
 			<strong>{rowName}</strong>
 		</div>
@@ -27,13 +27,8 @@
 	.notification:not(:last-child){
 		margin-bottom: 0;
 	}
+
+  .is-flex-gap{
+    gap: 0.35rem
+  }
 </style>
-
-
-<!--
-To break down:
-
-1. Row should just store styling component plus name of row (props)
-2. Slots should be Entity tiles which is passed from parent
-3. Pagination should be handled on two levels with just arrows and a number?
--->

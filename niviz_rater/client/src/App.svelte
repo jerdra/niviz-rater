@@ -11,6 +11,7 @@
 	import Modal from './Modal.svelte';
 	import { fetchEntities, exportCsv, getEntityView, updateRating } from './db.js';
 	import { entities, entityWheel, groupSpec, groupedEntities } from './store.js';
+  import { getNext } from './utils/app.js';
 
 	import Fa from 'svelte-fa';
 	import { faSave } from '@fortawesome/free-solid-svg-icons';
@@ -35,38 +36,27 @@
 		displayModal = true;
 	}
 
-	function getNext(id, previous){
-		const i = $entityWheel.map(e => e.id).indexOf(id);
-		let searchArr = [
-			...$entityWheel.slice(i + 1, $entityWheel.length),
-			...$entityWheel.slice(0, i)
-		]
-		if (previous) {
-			searchArr = searchArr.reverse();
-		}
-
-		// Now filter for any remaining
-		const next = searchArr.filter(e => (!skipRated || e.failed == null));
-
-		if (next.length === 0){
-			alert("Finished rating!")
-			displayModal = false;
-		} else {
-			selectedEntityId = next[0].id;
-		}
-	}
+  function nextModal(id, previous){
+    let next = getNext(id, previous, $entityWheel, skipRated);
+    if (next.length === 0){
+      alert("Finished rating!")
+      displayModal = false;
+    } else {
+      selectedEntityId = next[0].id;
+    }
+  }
 
 	async function handleNext(event){
 		displayModal=false;
 		entities.updateRating(event.detail.rating);
-		getNext(event.detail.rating.id, false);
+		nextModal(event.detail.rating.id, false);
 		displayModal=true;
 	}
 
 	async function handlePrevious(event){
 		displayModal=false;
 		entities.updateRating(event.detail.rating);
-		getNext(event.detail.rating.id, true);
+		nextModal(event.detail.rating.id, true);
 		displayModal=true;
 	}
 
@@ -129,6 +119,7 @@
 				{#each selectorMap as {name, value, selected} (name)}
 					<option {value} {selected}>{name}</option>
 				{/each}
+      </select>
 		</div>
 		<div class="field is-pulled-right mr-3">
 			<input id="filterSwitch"
@@ -141,8 +132,10 @@
 	</div>
 </section>
 
+<!-- Provide drop-down menu for selecting data chunks-->
+
 <!-- Wrap in a Modal context -->
-<Grid on:message={handleEntityMessages} groupedEntities={groupedEntities}/>
+<Grid on:message={handleEntityMessages} displayEntities={$groupedEntities}/>
 
 <!-- Queued modals for viewing should update w/skipRated -->
 {#if displayModal}

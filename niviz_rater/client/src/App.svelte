@@ -7,12 +7,10 @@
 	import download from 'downloadjs';
 
 	import Summary from './Summary.svelte';
-	import Grid from './Grid.svelte';
-	import Modal from './Modal.svelte';
+  import QcView from './QcView.svelte';
 	import { fetchEntities, exportCsv, getEntityView, updateRating } from './db.js';
-	import { entities, entityWheel, groupSpec} from './store.js';
+	import { entities, groupSpec} from './store.js';
   import { groupBy } from './utils.js';
-  import { getNext } from './utils/app.js';
 
 	import Fa from 'svelte-fa';
 	import { faSave } from '@fortawesome/free-solid-svg-icons';
@@ -39,40 +37,16 @@
 		summary.update();
 	});
 
-	async function handleEntityMessages(event){
-		// Wrapper for handling EntityID
-		selectedEntityId = event.detail.id;
-		displayModal = true;
-	}
+  async function handleRated(event){
+    let rating = {
+      failed: event.detail.failed,
+      comment: event.detail.comment,
+      id: event.detail.id,
+      rating: event.detail.rating
+    };
 
-  function nextModal(id, previous){
-    let next = getNext(id, previous, $entityWheel, skipRated);
-    if (next.length === 0){
-      alert("Finished rating!")
-      displayModal = false;
-    } else {
-      selectedEntityId = next[0].id;
-    }
+    entities.updateRating(rating);
   }
-
-	async function handleNext(event){
-		displayModal=false;
-		entities.updateRating(event.detail.rating);
-		nextModal(event.detail.rating.id, false);
-		displayModal=true;
-	}
-
-	async function handlePrevious(event){
-		displayModal=false;
-		entities.updateRating(event.detail.rating);
-		nextModal(event.detail.rating.id, true);
-		displayModal=true;
-	}
-
-	async function handleClose(event){
-		entities.updateRating(event.detail.rating);
-		displayModal=false;
-	}
 
 	async function downloadCsv(){
 		const result = await exportCsv();
@@ -140,13 +114,15 @@
 	</div>
 </section>
 
-<!-- Wrap in a Modal context -->
-<Grid
-  on:message={handleEntityMessages}
+<QcView
+  on:rated={handleRated}
   items={$entities}
-  groupFunc={groupFunc}/>
+  skipRated={skipRated}
+  groupFunc={groupFunc}
+  retrieveItemFunc={getEntityView}
+/>
 
-<!-- Queued modals for viewing should update w/skipRated -->
+<!-- Queued modals for viewing should update w/skipRated
 {#if displayModal}
 	{#each $entities as e}
 		{#if e.id == selectedEntityId}
@@ -160,6 +136,7 @@
 		{/if}
 	{/each}
 {/if}
+-->
 
 
 <style>

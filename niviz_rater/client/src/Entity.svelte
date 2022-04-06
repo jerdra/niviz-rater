@@ -10,7 +10,6 @@
 
 	import { createEventDispatcher } from 'svelte';
 
-	// Props for placement
 	export let entity;
 	const dispatch = createEventDispatcher();
 

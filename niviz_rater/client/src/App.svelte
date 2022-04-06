@@ -9,7 +9,7 @@
 	import Summary from './Summary.svelte';
   import QcView from './QcView.svelte';
 	import { fetchEntities, exportCsv, getEntityView, updateRating } from './db.js';
-	import { entities, groupSpec} from './store.js';
+	import { entities } from './store.js';
   import { groupBy } from './utils.js';
 
 	import Fa from 'svelte-fa';
@@ -17,8 +17,6 @@
 	import 'bulma/css/bulma.css';
 	import 'bulma-switch/dist/css/bulma-switch.min.css';
 
-
-	// INITIALIZATION LOGIC //
 	let summary;
 	let selectedEntityId;
 	let displayModal = false;

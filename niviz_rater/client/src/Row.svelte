@@ -21,11 +21,6 @@
 			<strong>{rowName}</strong>
 		</div>
 		<slot> </slot>
-		<!---
-		{#each entities as e}
-			<Entity on:message entity={e}/>
-		{/each}
-		--->
 	</div>
 </div>
 

@@ -18,7 +18,6 @@
 	export let comment;
 	export let rating_id;
 	let focused = false;
-  $: console.log(item);
 
 	let passfailArr;
 	$: passfailArr = [
@@ -50,8 +49,6 @@
 	export const setNone = () => {qc_rating = null}
 	const onFocus = () => focused=true;
 	const onBlur = () => focused=false;
-
-	$: console.log(focused);
 </script>
 
 {#if item}

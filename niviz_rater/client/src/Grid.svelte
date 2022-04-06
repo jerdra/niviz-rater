@@ -14,7 +14,7 @@
 -->
 <script>
 	import Row from './Row.svelte';
-	import Entity from './Entity.svelte';
+	import QcTile from './QcTile.svelte';
 
 	export let displayEntities = new Map();
 
@@ -33,7 +33,11 @@
     <Row rowName={row} entities={rows.get(row)}>
 
         {#each rows.get(row) as entity}
-          <Entity on:message entity={entity}/>
+          <QcTile
+            on:message
+            id={entity.id}
+            label={entity.name}
+            failed={entity.failed} />
         {/each}
 
     </Row>

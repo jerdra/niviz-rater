@@ -1,6 +1,5 @@
 <!--
-	Clickable QC tile object that returns its ID
-	Takes an entity containing:
+	Clickable QC tile object that returns its ID when clicked
 		- name
 		- failed
 		- id
@@ -10,26 +9,26 @@
 
 	import { createEventDispatcher } from 'svelte';
 
-	export let entity;
+  export let id;
+	export let label;
+  export let failed;
+
 	const dispatch = createEventDispatcher();
 
 	function handleClick(){
 		dispatch(
 			'message', {
-				id: entity.id
+				id: id
 			}
 		)
 	}
 
-	function getClass(e){
+	function getClass(status){
 		
-		if (e == null){
-			return "column is-2 notification is-dark"
-		}
 		let modifier;
-		if (e.failed == true){
+		if (status == true){
 			modifier = "is-danger"
-		} else if (e.failed == false){
+		} else if (status == false){
 			modifier = "is-success"
 		} else {
 			modifier = ""
@@ -37,16 +36,14 @@
 		return `column is-2 box is-clickable notification ${modifier}`
 	}
 
-	let entityClass;
-	$:entityClass = getClass(entity);
+	let tileClass;
+	$:tileClass = getClass(failed);
 
 
 </script>
 
-<div on:click={(entity) ? handleClick : ''} class='{entityClass}'>
-	{#if entity}
-		<strong>{entity.name}</strong>
-	{/if}
+<div on:click={(id) ? handleClick : ''} class='{tileClass}'>
+		<strong>{label}</strong>
 </div>
 
 <style>

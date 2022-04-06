@@ -30,7 +30,7 @@
 
 	{#each rowKeys as row}
 
-    <Row rowName={row} entities={rows.get(row)}>
+    <Row rowName={row}>
 
         {#each rows.get(row) as entity}
           <QcTile

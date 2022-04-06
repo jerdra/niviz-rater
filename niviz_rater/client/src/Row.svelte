@@ -5,8 +5,7 @@
 	users to examine rows containing failed QC, incomplete QC or passed QC
 
 	Properties:
-		- entities: List of ordered entities stored 
-		- orderSpec: Order specification for how to list entities
+    rowName: Name of Row
 -->
 
 <script>

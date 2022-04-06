@@ -61,7 +61,6 @@
 	}
 
 	async function handleClose(event){
-		console.log(entities);
 		entities.updateRating(event.detail.rating);
 		displayModal=false;
 	}
@@ -131,8 +130,6 @@
 		</div>
 	</div>
 </section>
-
-<!-- Provide drop-down menu for selecting data chunks-->
 
 <!-- Wrap in a Modal context -->
 <Grid on:message={handleEntityMessages} displayEntities={$groupedEntities}/>

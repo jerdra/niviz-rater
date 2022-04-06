@@ -61,6 +61,7 @@ export async function getEntityView(id){
     id: entity_view.entityId,
     rating: entity_view.entityRating,
     availableRatings: entity_view.entityAvailableRatings,
-    images: entity_view.entityImages
+    images: entity_view.entityImages,
+    name: entity_view.entityName
   }
 }

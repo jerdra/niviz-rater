@@ -94,7 +94,7 @@
 		<div class="modal-card"
 	   >
 			<header class="modal-card-head">
-				<p class="modal-card-title"> {item.itemName} </p>
+				<p class="modal-card-title"> {item.name} </p>
 				<button on:click={handleClose} class="delete"></button>
 			</header>
 

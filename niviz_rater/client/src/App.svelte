@@ -115,22 +115,6 @@
   retrieveItemFunc={getEntityView}
 />
 
-<!-- Queued modals for viewing should update w/skipRated
-{#if displayModal}
-	{#each $entities as e}
-		{#if e.id == selectedEntityId}
-			{#await getEntityView(e.id) then view}
-				<Modal
-					on:close={handleClose}
-					on:next={handleNext}
-					on:previous={handlePrevious}
-					entity={view}/>
-			{/await}
-		{/if}
-	{/each}
-{/if}
--->
-
 
 <style>
 	:global(html){

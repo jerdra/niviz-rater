@@ -10,7 +10,8 @@
 	import Grid from './Grid.svelte';
 	import Modal from './Modal.svelte';
 	import { fetchEntities, exportCsv, getEntityView, updateRating } from './db.js';
-	import { entities, entityWheel, groupSpec, groupedEntities } from './store.js';
+	import { entities, entityWheel, groupSpec} from './store.js';
+  import { groupBy } from './utils.js';
   import { getNext } from './utils/app.js';
 
 	import Fa from 'svelte-fa';
@@ -24,6 +25,14 @@
 	let selectedEntityId;
 	let displayModal = false;
 	let skipRated = false;
+
+  // Grid requirement
+  let groupFunc = (items) => groupBy(
+    $entities.sort( (a, b) =>
+      a.columnName - b.columnName
+    ),
+    $groupSpec
+  )
 
 	onMount(async () => {
 		entities.set(await fetchEntities());
@@ -132,7 +141,10 @@
 </section>
 
 <!-- Wrap in a Modal context -->
-<Grid on:message={handleEntityMessages} displayEntities={$groupedEntities}/>
+<Grid
+  on:message={handleEntityMessages}
+  items={$entities}
+  groupFunc={groupFunc}/>
 
 <!-- Queued modals for viewing should update w/skipRated -->
 {#if displayModal}

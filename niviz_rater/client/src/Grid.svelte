@@ -1,38 +1,32 @@
 <!-- 
 	@component
 
-  The Grid component has ownership over Entity components which represent
-	a single imaging object that is to be assessed.
+  Grid component that groups QC objects into rows containing columns
 
-	This ownership is carried through by Row components which group
-	Entity components into sortable rows
-
-
-	Properties:
-		- rowEntities: List of row entities maintained by Grid
-		- filterView: current filter being used
+  Properties:
+    items: A list of individual item objects containing {id, name, failed}
+    groupFunc: a grouping function to dynamically apply on items
 -->
 <script>
 	import Row from './Row.svelte';
 	import QcTile from './QcTile.svelte';
 
-	export let displayEntities = new Map();
+  export let items;
+  export let groupFunc;
 
 	let rowKeys = [];
-	let rows;
-	$: rows = displayEntities;
+	$: rows = groupFunc(items);
 	$: rowKeys = [...rows.keys()];
 
 </script>
 
 <div class="block">
 
-
 	{#each rowKeys as row}
 
     <Row rowName={row}>
-        {#each rows.get(row) as entity}
-          <QcTile on:message id={entity.id} label={entity.name} failed={entity.failed}/>
+        {#each rows.get(row) as item}
+          <QcTile on:message id={item.id} label={item.name} failed={item.failed}/>
         {/each}
     </Row>
 

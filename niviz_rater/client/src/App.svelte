@@ -38,14 +38,7 @@
 	});
 
   async function handleRated(event){
-    let rating = {
-      failed: event.detail.failed,
-      comment: event.detail.comment,
-      id: event.detail.id,
-      rating: event.detail.rating
-    };
-
-    entities.updateRating(rating);
+    entities.updateRating(event.detail);
   }
 
 	async function downloadCsv(){

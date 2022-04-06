@@ -23,13 +23,14 @@
 	let selectedEntityId;
 	let displayModal = false;
 	let skipRated = false;
+  let groupCriteria = (e) => (e.rowName);
 
   // Grid requirement
-  let groupFunc = (items) => groupBy(
-    $entities.sort( (a, b) =>
+  $: groupFunc = (items) => groupBy(
+      items.sort( (a, b) =>
       a.columnName - b.columnName
     ),
-    $groupSpec
+    groupCriteria
   )
 
 	onMount(async () => {
@@ -90,7 +91,7 @@
 	</div>
 	<div class="mb-2">
 		<div class="select is-pulled-left ml-3">
-			<select bind:value={$groupSpec}>
+			<select bind:value={groupCriteria}>
 				{#each selectorMap as {name, value, selected} (name)}
 					<option {value} {selected}>{name}</option>
 				{/each}

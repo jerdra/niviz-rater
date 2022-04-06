@@ -8,24 +8,23 @@
 <script>
 	import { onMount, createEventDispatcher } from 'svelte';
 	import { fly, slide, fade } from 'svelte/transition';
-	import ModalEntityData from './ModalEntityData.svelte';
-
-	export let entity;
+	import ItemRatingView from './ItemRatingView.svelte';
+	export let item;
 	const dispatch = createEventDispatcher();
-	let entityRating = {};
+	let itemRating = {};
 	let originalRating = {};
 	let modalData;
 
-	// Initialize entityRating
-	entityRating.failed = entity.entityFailed;
-	entityRating.comment = entity.entityComment;
-	entityRating.id = entity.entityId
-	if (entity.entityRating == null){
-		entityRating.rating = null
+	// Initialize itemRating
+	itemRating.failed = item.failed;
+	itemRating.comment = item.comment;
+	itemRating.id = item.id
+	if (item.rating == null){
+		itemRating.rating = null
 	} else {
-		entityRating.rating = entity.entityRating.id;
+		itemRating.rating = item.rating.id;
 	}
-	originalRating = Object.assign(originalRating, entityRating);
+	originalRating = Object.assign(originalRating, itemRating);
 
 	const isSame = (a,b) => {
 		return(
@@ -35,10 +34,10 @@
 	}
 
 	// Functions to deal with messaging logic
-	$: msg = { rating: entityRating }
+	$: msg = { rating: itemRating }
 	const handleClose = () => {
 		let result = true;
-		const changed = !isSame(originalRating, entityRating);
+		const changed = !isSame(originalRating, itemRating);
 		if (changed){
 			result = window.confirm("Do you want to save changes?");
 		}
@@ -95,17 +94,17 @@
 		<div class="modal-card"
 	   >
 			<header class="modal-card-head">
-				<p class="modal-card-title"> {entity.entityName} </p>
+				<p class="modal-card-title"> {item.name} </p>
 				<button on:click={handleClose} class="delete"></button>
 			</header>
 
 			<section class="modal-card-body">
-				<ModalEntityData 
-					entity={entity}
+				<ItemRatingView 
+					item={item}
 					bind:this={modalData}
-					bind:qc_rating={entityRating.failed}
-					bind:comment={entityRating.comment}
-					bind:rating_id={entityRating.rating}/>
+					bind:qc_rating={itemRating.failed}
+					bind:comment={itemRating.comment}
+					bind:rating_id={itemRating.rating}/>
 			</section>
 
 			<footer class="modal-card-foot">

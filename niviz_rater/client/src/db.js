@@ -55,5 +55,13 @@ export async function getEntityView(id){
 	/* Fetch view for entity */
 	let response = await fetch(`./api/entity/${id}/view`)
 	let entity_view = await response.json();
-	return entity_view
+  return {
+    failed: entity_view.entityFailed,
+    comment: entity_view.entityComment,
+    id: entity_view.entityId,
+    rating: entity_view.entityRating,
+    availableRatings: entity_view.entityAvailableRatings,
+    images: entity_view.entityImages,
+    name: entity_view.entityName
+  }
 }

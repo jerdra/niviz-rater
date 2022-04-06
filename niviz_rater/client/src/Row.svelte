@@ -5,31 +5,21 @@
 	users to examine rows containing failed QC, incomplete QC or passed QC
 
 	Properties:
-		- entities: List of ordered entities stored 
-		- orderSpec: Order specification for how to list entities
+    rowName: Name of Row
 -->
 
 <script>
-	import Entity from './Entity.svelte';
-
-	export let rowName, entities;
-
-	// Should construct key-value mapping of columns to entities
-	let columnEntityMap;
-	$: columnEntityMap = entities.reduce((m, e) => m.set(e.columnName, e), new Map())
-
+	export let rowName;
 </script>
 
 <!-- Row container -->
 	<!-- This is a container that should contain another container -->
 <div class="block notification is-primary m-5">
-	<div class="columns is-multiline">
+	<div class="columns is-multiline is-flex-gap">
 		<div class="column notification is-warning is-12">
 			<strong>{rowName}</strong>
 		</div>
-		{#each entities as e}
-			<Entity on:message entity={e}/>
-		{/each}
+		<slot> </slot>
 	</div>
 </div>
 
@@ -37,4 +27,8 @@
 	.notification:not(:last-child){
 		margin-bottom: 0;
 	}
+
+  .is-flex-gap{
+    gap: 0.35rem
+  }
 </style>

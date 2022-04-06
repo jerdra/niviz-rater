@@ -19,25 +19,3 @@ function createEntities(){
 	}
 }
 export let entities = createEntities();
-
-// groupSpec is a mapping from entity --> string that
-// defines how to group entities
-export let groupSpec = writable((e) => e.rowName);
-
-// Provide a filtered view of Entities
-export let groupedEntities = derived(
-	[entities, groupSpec],
-	([$entities, $groupSpec]) => {
-		return groupBy(
-			$entities.sort((a,b) => a.columnName - b.columnName), $groupSpec
-		);
-	}
-);
-
-// Convenience view into groupedEntities for using array indexing
-export let entityWheel = derived(
-	groupedEntities,
-	$groupedEntities => {
-		return [...$groupedEntities.values()].flat()
-	}
-)

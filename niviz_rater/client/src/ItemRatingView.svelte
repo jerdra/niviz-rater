@@ -8,14 +8,17 @@
 	- Dropdown containing available ratings
 -->
 
+
 <script>
+
 	import { onMount } from 'svelte';
 
-	export let entity;
+	export let item;
 	export let qc_rating;
 	export let comment;
 	export let rating_id;
 	let focused = false;
+  $: console.log(item);
 
 	let passfailArr;
 	$: passfailArr = [
@@ -28,7 +31,7 @@
 		node.checked=checked;
 	}
 
-	const availableRatings = entity.entityAvailableRatings.map(r => r.id);
+	let availableRatings = item.availableRatings.map(r => r.id);
 	export function setRating(num){
 		if (availableRatings.includes(num)){
 			rating_id=num;
@@ -51,8 +54,8 @@
 	$: console.log(focused);
 </script>
 
-{#if entity}
-	{#each entity.entityImages as image (image)}
+{#if item}
+	{#each item.images as image (image)}
 		<div class="block">
 			<object width="100%" data={image} type="image/svg+xml">
 				<img src={image}/>
@@ -65,7 +68,7 @@
 				<div class="select">
 					<select bind:value={rating_id}>
 						<option value="" selected disabled hidden>Select rating</option>
-						{#each entity.entityAvailableRatings as rating (rating)}
+						{#each item.availableRatings as rating (rating)}
 							<option value={rating.id}>{rating.name}</option>
 						{/each}
 					</select>

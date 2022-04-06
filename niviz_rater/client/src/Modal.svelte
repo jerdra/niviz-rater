@@ -8,8 +8,7 @@
 <script>
 	import { onMount, createEventDispatcher } from 'svelte';
 	import { fly, slide, fade } from 'svelte/transition';
-	import ModalEntityData from './ModalEntityData.svelte';
-
+	import ItemRatingView from './ItemRatingView.svelte';
 	export let item;
 	const dispatch = createEventDispatcher();
 	let itemRating = {};
@@ -17,13 +16,13 @@
 	let modalData;
 
 	// Initialize itemRating
-	itemRating.failed = item.itemFailed;
-	itemRating.comment = item.itemComment;
-	itemRating.id = item.itemId
-	if (item.itemRating == null){
+	itemRating.failed = item.failed;
+	itemRating.comment = item.comment;
+	itemRating.id = item.id
+	if (item.rating == null){
 		itemRating.rating = null
 	} else {
-		itemRating.rating = item.itemRating.id;
+		itemRating.rating = item.rating.id;
 	}
 	originalRating = Object.assign(originalRating, itemRating);
 
@@ -100,7 +99,7 @@
 			</header>
 
 			<section class="modal-card-body">
-				<ModalEntityData 
+				<ItemRatingView 
 					item={item}
 					bind:this={modalData}
 					bind:qc_rating={itemRating.failed}

@@ -88,7 +88,7 @@
 		{#if item.id == selectedItemId}
 			{#await retrieveItemFunc(item.id) then view}
 				<Modal
-					entity={view}
+					item={view}
           on:close={handleClose}
           on:next={handleNext}
           on:previous={handlePrevious}

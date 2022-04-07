@@ -8,6 +8,7 @@
 
 	import Summary from './Summary.svelte';
   import QcView from './QcView.svelte';
+  import Selector from './Selector.svelte';
 	import { fetchEntities, exportCsv, getEntityView, updateRating } from './db.js';
 	import { entities } from './store.js';
   import { groupBy } from './utils.js';
@@ -88,13 +89,12 @@
 		</button>
 	</div>
 	<div class="mb-2">
-		<div class="select is-pulled-left ml-3">
-			<select bind:value={groupCriteria}>
+
+    <Selector classOptions={"is-pulled-left ml-3"} bind:value={groupCriteria}>
 				{#each selectorMap as {name, value, selected} (name)}
 					<option {value} {selected}>{name}</option>
 				{/each}
-      </select>
-		</div>
+    </Selector>
 		<div class="field is-pulled-right mr-3">
 			<input id="filterSwitch"
 				type="checkbox"

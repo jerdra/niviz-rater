@@ -12,6 +12,7 @@
 <script>
 
 	import { onMount } from 'svelte';
+  import Selector from './Selector.svelte';
 
 	export let item;
 	export let qc_rating;
@@ -62,14 +63,12 @@
 	<div class="tile is-parent">
 		<div class="tile is-parent is-vertical">
 			<div class="tile is-child">
-				<div class="select">
-					<select bind:value={rating_id}>
+        <Selector bind:value={rating_id}>
 						<option value="" selected disabled hidden>Select rating</option>
 						{#each item.availableRatings as rating (rating)}
 							<option value={rating.id}>{rating.name}</option>
 						{/each}
-					</select>
-				</div>
+        </Selector>
 			</div>
 			<div class="tile is-child">
 				<div class="control">

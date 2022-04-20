@@ -15,6 +15,7 @@ RUN apt-get update \
 
 COPY . /niviz-rater
 RUN cd /niviz-rater/niviz_rater/client \
+	&& npm install \
 	&& npm run build \
 	&& cd ../../ \
 	&& pip install -r requirements.txt \

@@ -31,6 +31,7 @@
 	}
 
 	let availableRatings = item.availableRatings.map(r => r.id);
+
 	export function setRating(num){
 		if (availableRatings.includes(num)){
 			rating_id=num;
@@ -64,7 +65,6 @@
 			<div class="tile is-child">
 				<div class="select">
 					<select bind:value={rating_id}>
-						<option value="" selected disabled hidden>Select rating</option>
 						{#each item.availableRatings as rating (rating)}
 							<option value={rating.id}>{rating.name}</option>
 						{/each}
@@ -77,7 +77,7 @@
 						<label class="radio">
 							<input type="radio"
 								  use:markRadioDefault={checked}
-								  name="passfail" 
+								  name="passfail"
 								 {value} bind:group={qc_rating}>
 							{name}
 						</label>

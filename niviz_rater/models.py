@@ -40,7 +40,7 @@ class Entity(Model):
     component = ForeignKeyField(Component, null=False, backref='+')
     comment = TextField(default="")
     failed = BooleanField(null=True)
-    rating = ForeignKeyField(Rating, null=True, backref='+')
+    rating = ForeignKeyField(Rating, null=False, backref='+')
 
     class Meta:
         database = database_proxy

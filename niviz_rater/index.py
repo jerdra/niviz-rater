@@ -74,13 +74,14 @@ class ConfigComponent:
                          " expected 1!")
             logger.error(f"Matching specification:\n {image_descriptor}")
             print_matches = "\n".join([m.path for m in matches])
+            logger.error(f"{print_matches}")
             raise ValueError
 
         try:
             return matches[0]
         except IndexError:
             logger.error(f"Found 0 matches for\n {image_descriptor}!")
-            return
+            raise
 
     def build_qc_entities(self, image_list):
         """
@@ -95,22 +96,23 @@ class ConfigComponent:
 
         for key, group in self._group_by_entities(image_list):
             group_entities = list(group)
-            matched_images = [
-                self.find_matches(group_entities, i)
-                for i in self.image_descriptors
-            ]
+            try:
+                matched_images = [
+                    self.find_matches(group_entities, i)
+                    for i in self.image_descriptors
+                ]
+            except IndexError:
+                logger.error(f"No entities found for {key}")
+                continue
 
-            # Remove missing data
-            matched_images = [m for m in matched_images if m is not None]
-            if matched_images:
-                qc_entities.append(
-                    QCEntity(images=[m.path for m in matched_images],
-                             entities={
-                                 k: matched_images[0].entities[k]
-                                 for k in self.entities
-                             },
-                             tpl_name=self.name,
-                             tpl_column_name=self.column))
+            qc_entities.append(
+                QCEntity(images=[m.path for m in matched_images],
+                         entities={
+                             k: matched_images[0].entities[k]
+                             for k in self.entities
+                         },
+                         tpl_name=self.name,
+                         tpl_column_name=self.column))
 
         return qc_entities
 

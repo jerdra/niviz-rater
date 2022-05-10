@@ -146,6 +146,7 @@ def make_database(db, entities, available_ratings, row_tpl):
     # Step 0: We'll create our component and ratings
     with db.atomic():
         component = Component.create()
+        default_rating = Rating.create(name="No Rating", component=component.id)
         [
             Rating.create(name=r, component=component.id)
             for r in available_ratings
@@ -167,7 +168,8 @@ def make_database(db, entities, available_ratings, row_tpl):
             entity = Entity.create(name=e.name,
                                    component=component.id,
                                    rowname=make_rowname(row_tpl, e.entities),
-                                   columnname=e.column_name)
+                                   columnname=e.column_name,
+                                   rating=default_rating.id)
             [image_inserts.append((i, entity.id)) for i in e.images]
 
     with db.atomic():

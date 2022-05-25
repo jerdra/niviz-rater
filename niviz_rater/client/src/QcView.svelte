@@ -8,7 +8,7 @@
 
   import Grid from './Grid.svelte';
   import Modal from './Modal.svelte';
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, setContext } from 'svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -16,6 +16,13 @@
   export let items; // list of items to rate
   export let groupFunc; // function to use in order to group items into rows
   export let retrieveItemFunc; // function used to retrieve item information
+  export let validRatings; // list of ratings that can be applied
+
+  const key = "validRatings";
+  setContext(key, {
+    getValidRatings: () => validRatings
+  });
+
 
   let displayModal = false;
   let selectedItemId;
@@ -34,7 +41,7 @@
     }
 
     // Now filter for any remaining
-    const next = searchArr.filter(e => (!skipRated || e.failed == null));
+    const next = searchArr.filter(e => (!skipRated || e.rating.name == "None"));
     return next
   }
 

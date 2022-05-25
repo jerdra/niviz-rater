@@ -28,8 +28,10 @@ def _fileserver(path, app_config):
 
 
 def _annotation(annotation):
-    return {'id': annotation.id, 'name': annotation.name} if annotation else None
+    return {'id': annotation.id, 'name': annotation.name}
 
+def _rating(rating):
+    return {'id': rating.id, 'name': rating.name}
 
 @route('/api/overview')
 def summary():
@@ -77,7 +79,7 @@ def spreadsheet():
             "comment":
             e.comment,
             "rating":
-            e.rating.name,
+            _rating(e.rating),
             "id":
             e.id,
             "name":
@@ -104,7 +106,7 @@ def get_entity_info(entity_id):
         "name": e.name,
         "annotation": _annotation(e.annotation),
         "comment": e.comment,
-        "rating": e.rating.name,
+        "rating":_rating(e.rating),
         "imagePaths":
         [_fileserver(i.path, request.app.config) for i in e.images],
         "id": e.id,
@@ -141,7 +143,7 @@ def get_entity_view(entity_id):
         "entityAvailableAnnotations": available_annotations,
         "entityImages":
         [_fileserver(i.path, request.app.config) for i in images],
-        "entityRating": entity.rating.name
+        "entityRating":_rating(entity.rating)
     }
     return response
 

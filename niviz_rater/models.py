@@ -5,6 +5,7 @@ database_proxy = DatabaseProxy()
 
 
 class BaseModel(Model):
+
     class Meta:
         database = database_proxy
 
@@ -21,6 +22,7 @@ class Annotation(BaseModel):
     '''
     name = CharField()
     component = ForeignKeyField(Component, null=False, backref='+')
+
 
 class Rating(BaseModel):
     '''

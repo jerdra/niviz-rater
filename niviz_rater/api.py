@@ -6,7 +6,8 @@ import os
 from bottle import route, Bottle, request, response
 
 from niviz_rater.db import fetch_db_from_config
-from niviz_rater.models import (Entity, Image, TableRow, TableColumn, Annotation, Rating)
+from niviz_rater.models import (Entity, Image, TableRow, TableColumn,
+                                Annotation, Rating)
 import logging
 from peewee import JOIN, prefetch
 
@@ -30,8 +31,10 @@ def _fileserver(path, app_config):
 def _annotation(annotation):
     return {'id': annotation.id, 'name': annotation.name}
 
+
 def _rating(rating):
     return {'id': rating.id, 'name': rating.name}
+
 
 @route('/api/overview')
 def summary():
@@ -42,7 +45,8 @@ def summary():
         - remaining un-rated images
         - total number of annotations required
     """
-    n_unrated = (Entity.select().join(Rating).where(Rating.name == "None").count())
+    n_unrated = (Entity.select().join(Rating).where(
+        Rating.name == "None").count())
     logger.info(f"Number of unrated scans is: {n_unrated}")
 
     n_rows = TableRow.select().count()
@@ -56,6 +60,15 @@ def summary():
     }
 
 
+@route('/api/ratings')
+def ratings():
+    """
+    Return list of available ratings
+    """
+    valid_rating = [_rating(r) for r in Rating.select()]
+    return {"validRatings": valid_rating}
+
+
 @route('/api/spreadsheet')
 def spreadsheet():
     """
@@ -64,8 +77,8 @@ def spreadsheet():
     set of entities
     """
 
-    q = (Entity.select(Entity).join(TableRow).switch(Entity).join(
-        TableColumn).switch(Entity).join(Rating).switch(Entity).prefetch(Image))
+    q = (Entity.select(Entity).join(TableRow).switch(Entity).join(TableColumn).
+         switch(Entity).join(Rating).switch(Entity).prefetch(Image))
 
     # Need to remove base path
     r = {
@@ -106,7 +119,7 @@ def get_entity_info(entity_id):
         "name": e.name,
         "annotation": _annotation(e.annotation),
         "comment": e.comment,
-        "rating":_rating(e.rating),
+        "rating": _rating(e.rating),
         "imagePaths":
         [_fileserver(i.path, request.app.config) for i in e.images],
         "id": e.id,
@@ -143,7 +156,7 @@ def get_entity_view(entity_id):
         "entityAvailableAnnotations": available_annotations,
         "entityImages":
         [_fileserver(i.path, request.app.config) for i in images],
-        "entityRating":_rating(entity.rating)
+        "entityRating": _rating(entity.rating)
     }
     return response
 
@@ -189,8 +202,8 @@ def export_csv():
     """
 
     entities = (Entity.select(Entity, TableColumn, Annotation, Rating).join(
-        Annotation, JOIN.LEFT_OUTER).switch(Entity).join(TableColumn).order_by(
-            TableColumn.name))
+        Annotation, JOIN.LEFT_OUTER).switch(Entity).join(TableColumn).switch(
+            Entity).join(Rating).order_by(TableColumn.name))
     columns = TableColumn.select().order_by(TableColumn.name)
     rows = TableRow.select()
     rows_pf = prefetch(rows, entities)

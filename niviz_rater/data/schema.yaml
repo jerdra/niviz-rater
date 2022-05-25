@@ -11,10 +11,10 @@ Component:
   name: str(min = 1)
   column: str(min = 1)
   images: list(include('image'), min = 1)
-  ratings: include('rating', min = 1)
+  annotations: include('annotation', min = 1)
 
 entity: Entities()
 
 image: map(str(exclude = '!?{}'), str(exclude = '!?{}'))
 
-rating: list(str(exclude = '!?{}', min = 1))
+annotation: list(str(exclude = '!?{}', min = 1))

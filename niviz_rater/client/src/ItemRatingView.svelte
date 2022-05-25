@@ -5,36 +5,30 @@
 	- Images
 	- Current rating
 	- Comment box that can be updated
-	- Dropdown containing available ratings
+	- Dropdown containing available annotations
 -->
 
 
 <script>
 
-	import { onMount } from 'svelte';
+	import { onMount, getContext } from 'svelte';
 
 	export let item;
-	export let qc_rating;
+	export let rating;
 	export let comment;
-	export let rating_id;
+	export let annotation_id;
+  const { getValidRatings } = getContext("validRatings");
 	let focused = false;
-
-	let passfailArr;
-	$: passfailArr = [
-		{value: false, name: "Pass", checked: qc_rating==false || null},
-		{value: true, name: "Fail", checked: qc_rating==true || null},
-		{value: null, name: "None", checked: qc_rating==null || null}
-	];
 
 	function markRadioDefault(node, checked){
 		node.checked=checked;
 	}
 
-	let availableRatings = item.availableRatings.map(r => r.id);
+	let availableAnnotations = item.availableAnnotations.map(r => r.id);
 
-	export function setRating(num){
-		if (availableRatings.includes(num)){
-			rating_id=num;
+	export function setAnnotation(num){
+		if (availableAnnotations.includes(num)){
+			annotation_id=num;
 		} else {
 			console.log("Not an available rating")
 		}
@@ -44,10 +38,6 @@
 		return focused;
 	}
 
-
-	export const setPass = () => {qc_rating = false}
-	export const setFail = () => {qc_rating = true}
-	export const setNone = () => {qc_rating = null}
 	const onFocus = () => focused=true;
 	const onBlur = () => focused=false;
 </script>
@@ -64,21 +54,21 @@
 		<div class="tile is-parent is-vertical">
 			<div class="tile is-child">
 				<div class="select">
-					<select bind:value={rating_id}>
-						{#each item.availableRatings as rating (rating)}
-							<option value={rating.id}>{rating.name}</option>
+					<select bind:value={annotation_id}>
+						{#each item.availableAnnotations as annotation (annotation)}
+							<option value={annotation.id}>{annotation.name}</option>
 						{/each}
 					</select>
 				</div>
 			</div>
 			<div class="tile is-child">
 				<div class="control">
-					{#each passfailArr as {name, value, checked} (name)}
+					{#each getValidRatings() as {id, name} (id)}
 						<label class="radio">
 							<input type="radio"
-								  use:markRadioDefault={checked}
+								  use:markRadioDefault={id == rating}
 								  name="passfail"
-								 {value} bind:group={qc_rating}>
+								 value={id} bind:group={rating}>
 							{name}
 						</label>
 					{/each}

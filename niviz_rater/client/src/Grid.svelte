@@ -23,7 +23,7 @@
 	{#each rowKeys as row}
     <Row rowName={row}>
         {#each rows.get(row) as item}
-          <QcTile on:message id={item.id} label={item.name} failed={item.failed}/>
+          <QcTile on:message id={item.id} label={item.name} rating={item.rating}/>
         {/each}
     </Row>
 	{/each}

@@ -8,7 +8,7 @@
 
 	import Summary from './Summary.svelte';
   import QcView from './QcView.svelte';
-	import { fetchEntities, exportCsv, getEntityView, updateRating } from './db.js';
+	import { fetchEntities, fetchRatings, exportCsv, getEntityView, updateRating } from './db.js';
 	import { entities } from './store.js';
   import { groupBy } from './utils.js';
 
@@ -21,6 +21,7 @@
 	let selectedEntityId;
 	let displayModal = false;
 	let skipRated = false;
+  let validRatings;
   let groupCriteria = (e) => (e.rowName);
 
   // Grid requirement
@@ -34,6 +35,7 @@
 	onMount(async () => {
 		entities.set(await fetchEntities());
 		summary.update();
+    validRatings = await fetchRatings();
 	});
 
   async function handleRated(event){
@@ -53,21 +55,13 @@
 			selected: true
 		},
 		{
-			name: "Rating Category",
-			value: (e) => (e.rating) ? e.rating.name : 'Unrated',
+			name: "Annotation Category",
+			value: (e) => e.annotation,
 			selected: false
 		},
 		{
-			name: "Pass/Fail",
-			value: (e) => {
-				if (e.failed == null){
-					return "Unrated"
-				} else if (e.failed == true) {
-					return "Failed"
-				} else {
-					return "Pass"
-				}
-			},
+			name: "Rating",
+			value: (e) => e.rating,
 			selected: false
 		}
 	];
@@ -112,6 +106,7 @@
   skipRated={skipRated}
   groupFunc={groupFunc}
   retrieveItemFunc={getEntityView}
+  {validRatings}
 />
 
 

@@ -11,7 +11,7 @@ Components:
     column: "A"
     images:
       - {description: lorem1}
-    ratings:
+    annotations:
       - Terrible 
       - Bad
       - Alright
@@ -24,7 +24,7 @@ Components:
     images:
       - {description: lorem2}
       - {description: lorem3}
-    ratings:
+    annotations:
       - Good
       - Bad
 
@@ -34,6 +34,6 @@ Components:
     images:
       - {description: lorem4}
       - {description: lorem5}
-    ratings:
+    annotations:
       - Good
       - Terrible

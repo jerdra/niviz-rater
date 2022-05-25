@@ -31,6 +31,12 @@ export async function fetchEntities(){
 	});
 }
 
+export async function fetchRatings(){
+  const response = await fetch("./api/ratings");
+  let ratings = await response.json();
+  return ratings.validRatings
+}
+
 export const updateRating = async function(rating){
 
 	const statusCode = await postDB('./api/entity', rating);
@@ -56,11 +62,11 @@ export async function getEntityView(id){
 	let response = await fetch(`./api/entity/${id}/view`)
 	let entity_view = await response.json();
   return {
-    failed: entity_view.entityFailed,
+    rating: entity_view.entityRating,
     comment: entity_view.entityComment,
     id: entity_view.entityId,
-    rating: entity_view.entityRating,
-    availableRatings: entity_view.entityAvailableRatings,
+    annotation: entity_view.entityAnnotation,
+    availableAnnotations: entity_view.entityAvailableAnnotations,
     images: entity_view.entityImages,
     name: entity_view.entityName
   }

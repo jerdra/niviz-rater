@@ -1,9 +1,11 @@
-from peewee import (Model, ForeignKeyField, TextField, CharField, BooleanField, DatabaseProxy)
+from peewee import (Model, ForeignKeyField, TextField, CharField,
+                    DatabaseProxy)
 
 database_proxy = DatabaseProxy()
 
 
 class BaseModel(Model):
+
     class Meta:
         database = database_proxy
 
@@ -14,12 +16,23 @@ class Component(BaseModel):
     '''
 
 
-class Rating(BaseModel):
+class Annotation(BaseModel):
     '''
-    Rating ID --> named rating mapping
+    Annotation ID --> named rating mapping
     '''
     name = CharField()
     component = ForeignKeyField(Component, null=False, backref='+')
+
+
+class Rating(BaseModel):
+    '''
+    Pass/Fail/Uncertain/None ratings
+    '''
+    name = CharField()
+
+
+class Rating(BaseModel):
+    name = CharField()
 
 
 class TableColumn(BaseModel):
@@ -39,33 +52,26 @@ class Entity(Model):
     rowname = ForeignKeyField(TableRow, null=False, backref='entities')
     component = ForeignKeyField(Component, null=False, backref='+')
     comment = TextField(default="")
-    failed = BooleanField(null=True)
     rating = ForeignKeyField(Rating, null=False, backref='+')
+    annotation = ForeignKeyField(Annotation, null=False, backref='+')
 
     class Meta:
         database = database_proxy
         indexes = ((("name", ), True), )
 
     @property
-    def has_failed(self):
-        if self.failed is True:
-            return "Fail"
-        elif self.failed is False:
-            return "Pass"
-        else:
-            return ""
-
-    @property
     def entry(self):
-        if self.rating:
-            rating = self.rating.name
+        if self.annotation:
+            annotation = self.annotation.name
         else:
+            annotation = ""
+
+        if self.rating.name == "None":
             rating = ""
-        return (
-            rating,
-            self.has_failed,
-            self.comment or ""
-        )
+        else:
+            rating = self.rating.name
+
+        return (annotation, rating, self.comment or "")
 
 
 class Image(BaseModel):

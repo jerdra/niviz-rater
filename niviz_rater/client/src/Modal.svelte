@@ -16,14 +16,11 @@
 	let modalData;
 
 	// Initialize itemRating
-	itemRating.failed = item.failed;
+	itemRating.rating = item.rating.id;
 	itemRating.comment = item.comment;
 	itemRating.id = item.id
-	if (item.rating == null){
-		itemRating.rating = null
-	} else {
-		itemRating.rating = item.rating.id;
-	}
+  itemRating.annotation = item.annotation.id;
+
 	originalRating = Object.assign(originalRating, itemRating);
 
 	const isSame = (a,b) => {
@@ -62,15 +59,6 @@
 				case "b":
 						handlePrevious();
 					break;
-				case "z":
-					modalData.setPass();
-					break;
-				case "x":
-					modalData.setFail();
-					break;
-				case "c":
-					modalData.setNone();
-					break;
 				case "Escape":
 					handleClose();
 					break;
@@ -102,9 +90,9 @@
 				<ItemRatingView 
 					item={item}
 					bind:this={modalData}
-					bind:qc_rating={itemRating.failed}
+					bind:rating={itemRating.rating}
 					bind:comment={itemRating.comment}
-					bind:rating_id={itemRating.rating}/>
+					bind:annotation={itemRating.annotation}/>
 			</section>
 
 			<footer class="modal-card-foot">

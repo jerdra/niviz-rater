@@ -12,8 +12,8 @@ from typing import Iterable, Dict, Any
 
 from peewee import SqliteDatabase
 
-from niviz_rater.models import (Entity, Rating, Image, Component, TableRow,
-                                TableColumn)
+from niviz_rater.models import (Entity, Rating, Annotation, Image, Component,
+                                TableRow, TableColumn)
 
 logger = logging.getLogger(__name__)
 
@@ -44,13 +44,12 @@ class ConfigComponent:
     Configurable Factory class for building QC components
     from list of images
     """
-
-    def __init__(self, entities, name, column, images, ratings):
+    def __init__(self, entities, name, column, images, annotations):
         self.entities = entities
         self.name = name
         self.column = column
         self.image_descriptors = images
-        self.available_ratings = ratings
+        self.available_annotations = annotations
 
     def _group_by_entities(self, bidsfiles):
         """
@@ -125,10 +124,11 @@ def build_index(db: SqliteDatabase, bids_files: Iterable[str],
     row_tpl = AxisNameTpl(Template(qc_spec['RowDescription']['name']),
                           qc_spec['RowDescription']['entities'])
 
+    default_rating = initialize_db_ratings(db)
     for c in qc_spec['Components']:
         component = ConfigComponent(**c)
         make_database(db, component.build_qc_entities(bids_files),
-                      component.available_ratings, row_tpl)
+                      component.available_annotations, row_tpl, default_rating)
 
 
 def make_rowname(rowtpl, entities):
@@ -136,21 +136,36 @@ def make_rowname(rowtpl, entities):
     return rowtpl.tpl.substitute(keys)
 
 
-def make_database(db, entities, available_ratings, row_tpl):
+def initialize_db_ratings(db):
+    """
+    Set-up Ratings table in database
+    """
+
+    Rating.create_table()
+    with db.atomic():
+        default_rating = Rating.create(name="None")
+        [Rating.create(name=r) for r in ["Pass", "Fail", "Uncertain"]]
+
+    return default_rating
+
+
+def make_database(db, entities, available_annotations, row_tpl,
+                  default_rating):
     """
     Add tables and data to database
     """
     # First create necessary tables
-    db.create_tables([Component, Rating, Entity, Image, TableRow, TableColumn])
+    db.create_tables(
+        [Component, Annotation, Entity, Image, TableRow, TableColumn])
 
-    # Step 0: We'll create our component and ratings
+    # Step 0: We'll create our component and annotations
     with db.atomic():
         component = Component.create()
-        default_rating = Rating.create(name="No Rating",
-                                       component=component.id)
+        default_annotation = Annotation.create(name="No Rating",
+                                               component=component.id)
         [
-            Rating.create(name=r, component=component.id)
-            for r in available_ratings
+            Annotation.create(name=r, component=component.id)
+            for r in available_annotations
         ]
 
     # Step 1: Get set of row names to use and save in dictionary
@@ -170,6 +185,7 @@ def make_database(db, entities, available_ratings, row_tpl):
                                    component=component.id,
                                    rowname=make_rowname(row_tpl, e.entities),
                                    columnname=e.column_name,
+                                   annotation=default_annotation.id,
                                    rating=default_rating.id)
             [image_inserts.append((i, entity.id)) for i in e.images]
 

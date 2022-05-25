@@ -1,4 +1,5 @@
-from peewee import (Model, ForeignKeyField, TextField, CharField, BooleanField, DatabaseProxy)
+from peewee import (Model, ForeignKeyField, TextField, CharField, BooleanField,
+                    DatabaseProxy)
 
 database_proxy = DatabaseProxy()
 
@@ -39,7 +40,7 @@ class Entity(Model):
     rowname = ForeignKeyField(TableRow, null=False, backref='entities')
     component = ForeignKeyField(Component, null=False, backref='+')
     comment = TextField(default="")
-    failed = BooleanField(null=True)
+    status = TextField(null=True)
     rating = ForeignKeyField(Rating, null=False, backref='+')
 
     class Meta:
@@ -47,25 +48,12 @@ class Entity(Model):
         indexes = ((("name", ), True), )
 
     @property
-    def has_failed(self):
-        if self.failed is True:
-            return "Fail"
-        elif self.failed is False:
-            return "Pass"
-        else:
-            return ""
-
-    @property
     def entry(self):
         if self.rating:
             rating = self.rating.name
         else:
             rating = ""
-        return (
-            rating,
-            self.has_failed,
-            self.comment or ""
-        )
+        return (rating, self.status, self.comment or "")
 
 
 class Image(BaseModel):

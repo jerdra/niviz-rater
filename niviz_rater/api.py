@@ -40,8 +40,8 @@ def summary():
         - remaining un-rated images
         - total number of ratings required
     """
-    n_unrated = (Entity.select(Entity.failed).where(
-        Entity.failed.is_null()).count())
+    n_unrated = (Entity.select(Entity.status).where(
+        Entity.status.is_null()).count())
     logger.info(f"Number of unrated scans is: {n_unrated}")
 
     n_rows = TableRow.select().count()
@@ -77,8 +77,8 @@ def spreadsheet():
             [_fileserver(i.path, request.app.config) for i in e.images],
             "comment":
             e.comment,
-            "failed":
-            e.failed,
+            "status":
+            e.status,
             "id":
             e.id,
             "name":
@@ -105,7 +105,7 @@ def get_entity_info(entity_id):
         "name": e.name,
         "rating": _rating(e.rating),
         "comment": e.comment,
-        "failed": e.failed,
+        "status": e.status,
         "imagePaths":
         [_fileserver(i.path, request.app.config) for i in e.images],
         "id": e.id,
@@ -143,7 +143,7 @@ def get_entity_view(entity_id):
         "entityAvailableRatings": available_ratings,
         "entityImages":
         [_fileserver(i.path, request.app.config) for i in images],
-        "entityFailed": entity.failed
+        "entityStatus": entity.status
     }
     return response
 
@@ -156,7 +156,7 @@ def update_rating():
         -   comment
         -   qc_rating
     """
-    expected_keys = {'rating', 'comment', 'failed'}
+    expected_keys = {'rating', 'comment', 'status'}
     data = request.json
     if data is None:
         logger.info("No changes requested...")

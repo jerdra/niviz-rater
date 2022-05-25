@@ -57,7 +57,8 @@ export async function getEntityView(id){
 	let entity_view = await response.json();
   return {
     rating: entity_view.entityRating,
-    isRated: function() { return this.rating != "None" },
+    ratingName: function() { return this.rating.name },
+    isRated: function() { return this.rating.name != "None" },
     comment: entity_view.entityComment,
     id: entity_view.entityId,
     annotation: entity_view.entityAnnotation,

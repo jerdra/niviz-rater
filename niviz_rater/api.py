@@ -27,7 +27,7 @@ def _fileserver(path, app_config):
     return addr
 
 
-def _annotation(annotaiton):
+def _annotation(annotation):
     return {'id': annotation.id, 'name': annotation.name} if annotation else None
 
 
@@ -40,8 +40,7 @@ def summary():
         - remaining un-rated images
         - total number of annotations required
     """
-    n_unrated = (Entity.select(Entity.rating).where(
-        Entity.rating == "None").count())
+    n_unrated = (Entity.select().join(Rating).where(Rating.name == "None").count())
     logger.info(f"Number of unrated scans is: {n_unrated}")
 
     n_rows = TableRow.select().count()
@@ -78,7 +77,7 @@ def spreadsheet():
             "comment":
             e.comment,
             "rating":
-            e.rating,
+            e.rating.name,
             "id":
             e.id,
             "name":
@@ -103,9 +102,9 @@ def get_entity_info(entity_id):
 
     r = {
         "name": e.name,
-        "annotation": _annotation(e.rating),
+        "annotation": _annotation(e.annotation),
         "comment": e.comment,
-        "rating": e.rating,
+        "rating": e.rating.name,
         "imagePaths":
         [_fileserver(i.path, request.app.config) for i in e.images],
         "id": e.id,
@@ -142,7 +141,7 @@ def get_entity_view(entity_id):
         "entityAvailableAnnotations": available_annotations,
         "entityImages":
         [_fileserver(i.path, request.app.config) for i in images],
-        "entityRating": entity.rating
+        "entityRating": entity.rating.name
     }
     return response
 

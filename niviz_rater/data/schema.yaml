@@ -1,5 +1,4 @@
 ImageExtensions: list(str(ignore_case = True), min = 1)
-RowEntities: list(str(), min=1)
 
 RowDescription:
   entities: list(include('entity'), min = 1)

@@ -22,6 +22,12 @@ class Annotation(BaseModel):
     name = CharField()
     component = ForeignKeyField(Component, null=False, backref='+')
 
+class Rating(BaseModel):
+    '''
+    Pass/Fail/Uncertain/None ratings
+    '''
+    name = CharField()
+
 
 class Rating(BaseModel):
     name = CharField()

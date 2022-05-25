@@ -15,9 +15,9 @@ class Component(BaseModel):
     '''
 
 
-class Rating(BaseModel):
+class Annotation(BaseModel):
     '''
-    Rating ID --> named rating mapping
+    Annotation ID --> named rating mapping
     '''
     name = CharField()
     component = ForeignKeyField(Component, null=False, backref='+')
@@ -41,7 +41,7 @@ class Entity(Model):
     component = ForeignKeyField(Component, null=False, backref='+')
     comment = TextField(default="")
     status = TextField(null=True)
-    rating = ForeignKeyField(Rating, null=False, backref='+')
+    rating = ForeignKeyField(Annotation, null=False, backref='+')
 
     class Meta:
         database = database_proxy

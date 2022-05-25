@@ -6,7 +6,7 @@ import os
 from bottle import route, Bottle, request, response
 
 from niviz_rater.db import fetch_db_from_config
-from niviz_rater.models import (Entity, Image, TableRow, TableColumn, Rating)
+from niviz_rater.models import (Entity, Image, TableRow, TableColumn, Annotation)
 import logging
 from peewee import JOIN, prefetch
 
@@ -131,8 +131,8 @@ def get_entity_view(entity_id):
                           Entity).join(Entity).where(Image.entity == entity)
 
     # This one is insane
-    q_rating = Rating.select().where(
-        Rating.component_id == entity.component_id)
+    q_rating = Annotation.select().where(
+        Annotation.component_id == entity.component_id)
     available_ratings = [_rating(r) for r in q_rating]
 
     response = {
@@ -188,8 +188,8 @@ def export_csv():
     Export participants.tsv CSV file
     """
 
-    entities = (Entity.select(Entity, TableColumn, Rating).join(
-        Rating, JOIN.LEFT_OUTER).switch(Entity).join(TableColumn).order_by(
+    entities = (Entity.select(Entity, TableColumn, Annotation).join(
+        Annotation, JOIN.LEFT_OUTER).switch(Entity).join(TableColumn).order_by(
             TableColumn.name))
     columns = TableColumn.select().order_by(TableColumn.name)
     rows = TableRow.select()

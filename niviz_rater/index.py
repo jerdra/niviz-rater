@@ -12,7 +12,7 @@ from typing import Iterable, Dict, Any
 
 from peewee import SqliteDatabase
 
-from niviz_rater.models import (Entity, Rating, Image, Component, TableRow,
+from niviz_rater.models import (Entity, Annotation, Image, Component, TableRow,
                                 TableColumn)
 
 logger = logging.getLogger(__name__)
@@ -141,15 +141,15 @@ def make_database(db, entities, available_ratings, row_tpl):
     Add tables and data to database
     """
     # First create necessary tables
-    db.create_tables([Component, Rating, Entity, Image, TableRow, TableColumn])
+    db.create_tables([Component, Annotation, Entity, Image, TableRow, TableColumn])
 
     # Step 0: We'll create our component and ratings
     with db.atomic():
         component = Component.create()
-        default_rating = Rating.create(name="No Rating",
+        default_rating = Annotation.create(name="No Rating",
                                        component=component.id)
         [
-            Rating.create(name=r, component=component.id)
+            Annotation.create(name=r, component=component.id)
             for r in available_ratings
         ]
 

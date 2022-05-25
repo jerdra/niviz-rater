@@ -63,7 +63,13 @@ class Entity(Model):
             annotation = self.annotation.name
         else:
             annotation = ""
-        return (annotation, self.rating.name, self.comment or "")
+
+        if self.rating.name == "None":
+            rating = ""
+        else:
+            rating = self.rating.name
+
+        return (annotation, rating, self.comment or "")
 
 
 class Image(BaseModel):

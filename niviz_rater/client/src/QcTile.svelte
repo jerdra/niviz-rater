@@ -39,7 +39,7 @@
 	}
 
 	let tileClass;
-	$:tileClass = getClass(rating);
+	$:tileClass = getClass(rating.name);
 
 
 </script>

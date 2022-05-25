@@ -53,11 +53,11 @@ class Entity(Model):
 
     @property
     def entry(self):
-        if self.rating:
-            rating = self.rating.name
+        if self.annotation:
+            annotation = self.annotation.name
         else:
-            rating = ""
-        return (rating, self.status, self.comment or "")
+            annotation = ""
+        return (annotation, self.rating.name, self.comment or "")
 
 
 class Image(BaseModel):

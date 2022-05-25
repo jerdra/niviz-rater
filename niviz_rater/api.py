@@ -6,7 +6,7 @@ import os
 from bottle import route, Bottle, request, response
 
 from niviz_rater.db import fetch_db_from_config
-from niviz_rater.models import (Entity, Image, TableRow, TableColumn, Annotation)
+from niviz_rater.models import (Entity, Image, TableRow, TableColumn, Annotation, Rating)
 import logging
 from peewee import JOIN, prefetch
 
@@ -27,8 +27,8 @@ def _fileserver(path, app_config):
     return addr
 
 
-def _rating(rating):
-    return {'id': rating.id, 'name': rating.name} if rating else None
+def _annotation(annotaiton):
+    return {'id': annotation.id, 'name': annotation.name} if annotation else None
 
 
 @route('/api/overview')
@@ -38,10 +38,10 @@ def summary():
         - rows of entity index
         - qc items per row entity of index
         - remaining un-rated images
-        - total number of ratings required
+        - total number of annotations required
     """
-    n_unrated = (Entity.select(Entity.status).where(
-        Entity.status.is_null()).count())
+    n_unrated = (Entity.select(Entity.rating).where(
+        Entity.rating == "None").count())
     logger.info(f"Number of unrated scans is: {n_unrated}")
 
     n_rows = TableRow.select().count()
@@ -64,7 +64,7 @@ def spreadsheet():
     """
 
     q = (Entity.select(Entity).join(TableRow).switch(Entity).join(
-        TableColumn).switch(Entity).prefetch(Image))
+        TableColumn).switch(Entity).join(Rating).switch(Entity).prefetch(Image))
 
     # Need to remove base path
     r = {
@@ -77,14 +77,14 @@ def spreadsheet():
             [_fileserver(i.path, request.app.config) for i in e.images],
             "comment":
             e.comment,
-            "status":
-            e.status,
+            "rating":
+            e.rating,
             "id":
             e.id,
             "name":
             e.name,
-            "rating":
-            _rating(e.rating)
+            "annotation":
+            _annotation(e.annotation)
         } for e in q]
     }
     return r
@@ -94,7 +94,7 @@ def spreadsheet():
 def get_entity_info(entity_id):
     try:
         e = (Entity.select(Entity).join(TableRow).switch(Entity).join(
-            TableColumn).switch(Entity).where(
+            TableColumn).switch(Entity).join(Rating).switch(Entity).where(
                 Entity.id == entity_id).prefetch(Image))[0]
     except IndexError:
         logger.error("Cannot find entity with specified ID!")
@@ -103,9 +103,9 @@ def get_entity_info(entity_id):
 
     r = {
         "name": e.name,
-        "rating": _rating(e.rating),
+        "annotation": _annotation(e.rating),
         "comment": e.comment,
-        "status": e.status,
+        "rating": e.rating,
         "imagePaths":
         [_fileserver(i.path, request.app.config) for i in e.images],
         "id": e.id,
@@ -122,41 +122,40 @@ def get_entity_view(entity_id):
     Yields:
         entity name
         array of entity image paths
-        available ratings
-        current rating for a given entity
+        available annotations
+        current annotation for a given entity
     """
 
     entity = Entity.select().where(Entity.id == entity_id).first()
     images = Image.select(Image,
                           Entity).join(Entity).where(Image.entity == entity)
 
-    # This one is insane
-    q_rating = Annotation.select().where(
+    q_annotation = Annotation.select().where(
         Annotation.component_id == entity.component_id)
-    available_ratings = [_rating(r) for r in q_rating]
+    available_annotations = [_annotation(r) for r in q_annotation]
 
     response = {
         "entityId": entity.id,
         "entityName": entity.name,
-        "entityRating": _rating(entity.rating),
+        "entityAnnotation": _annotation(entity.annotation),
         "entityComment": entity.comment,
-        "entityAvailableRatings": available_ratings,
+        "entityAvailableAnnotations": available_annotations,
         "entityImages":
         [_fileserver(i.path, request.app.config) for i in images],
-        "entityStatus": entity.status
+        "entityRating": entity.rating
     }
     return response
 
 
 @route('/api/entity', method='POST')
-def update_rating():
+def update_annotation():
     """
     Post body should contain information about:
-        -   rating_id
+        -   annotation_id
         -   comment
         -   qc_rating
     """
-    expected_keys = {'rating', 'comment', 'status'}
+    expected_keys = {'annotation', 'comment', 'rating'}
     data = request.json
     if data is None:
         logger.info("No changes requested...")
@@ -188,7 +187,7 @@ def export_csv():
     Export participants.tsv CSV file
     """
 
-    entities = (Entity.select(Entity, TableColumn, Annotation).join(
+    entities = (Entity.select(Entity, TableColumn, Annotation, Rating).join(
         Annotation, JOIN.LEFT_OUTER).switch(Entity).join(TableColumn).order_by(
             TableColumn.name))
     columns = TableColumn.select().order_by(TableColumn.name)

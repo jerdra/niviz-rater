@@ -53,21 +53,13 @@
 			selected: true
 		},
 		{
-			name: "Rating Category",
-			value: (e) => (e.rating) ? e.rating.name : 'Unrated',
+			name: "Annotation Category",
+			value: (e) => e.annotation,
 			selected: false
 		},
 		{
-			name: "Pass/Fail",
-			value: (e) => {
-				if (e.failed == null){
-					return "Unrated"
-				} else if (e.failed == true) {
-					return "Failed"
-				} else {
-					return "Pass"
-				}
-			},
+			name: "Rating",
+			value: (e) => e.rating,
 			selected: false
 		}
 	];

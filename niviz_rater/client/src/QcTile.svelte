@@ -1,7 +1,7 @@
 <!--
 	Clickable QC tile object that returns its ID when clicked
 		- name
-		- failed
+		- rating
 		- id
 -->
 
@@ -11,7 +11,7 @@
 
   export let id;
 	export let label;
-  export let failed;
+  export let rating;
 
 	const dispatch = createEventDispatcher();
 
@@ -26,18 +26,20 @@
 	function getClass(status){
 		
 		let modifier;
-		if (status == true){
+		if (status == "Fail"){
 			modifier = "is-danger"
-		} else if (status == false){
+		} else if (status == "Pass"){
 			modifier = "is-success"
-		} else {
-			modifier = ""
-		}
+		} else if (status == "Uncertain") {
+			modifier = "is-warning"
+		} else if (status == "None") {
+      modifier = ""
+    }
 		return `column is-2 box is-clickable notification ${modifier}`
 	}
 
 	let tileClass;
-	$:tileClass = getClass(failed);
+	$:tileClass = getClass(rating);
 
 
 </script>

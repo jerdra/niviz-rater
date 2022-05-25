@@ -1,4 +1,4 @@
-from peewee import (Model, ForeignKeyField, TextField, CharField, BooleanField,
+from peewee import (Model, ForeignKeyField, TextField, CharField,
                     DatabaseProxy)
 
 database_proxy = DatabaseProxy()
@@ -23,6 +23,10 @@ class Annotation(BaseModel):
     component = ForeignKeyField(Component, null=False, backref='+')
 
 
+class Rating(BaseModel):
+    name = CharField()
+
+
 class TableColumn(BaseModel):
     name = CharField(primary_key=True)
 
@@ -40,8 +44,8 @@ class Entity(Model):
     rowname = ForeignKeyField(TableRow, null=False, backref='entities')
     component = ForeignKeyField(Component, null=False, backref='+')
     comment = TextField(default="")
-    status = TextField(null=True)
-    rating = ForeignKeyField(Annotation, null=False, backref='+')
+    rating = ForeignKeyField(Rating, null=False, backref='+')
+    annotation = ForeignKeyField(Annotation, null=False, backref='+')
 
     class Meta:
         database = database_proxy

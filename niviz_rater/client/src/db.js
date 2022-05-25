@@ -56,11 +56,12 @@ export async function getEntityView(id){
 	let response = await fetch(`./api/entity/${id}/view`)
 	let entity_view = await response.json();
   return {
-    failed: entity_view.entityFailed,
+    rating: entity_view.entityRating,
+    isRated: function() { return this.rating != "None" },
     comment: entity_view.entityComment,
     id: entity_view.entityId,
-    rating: entity_view.entityRating,
-    availableRatings: entity_view.entityAvailableRatings,
+    annotation: entity_view.entityAnnotation,
+    availableAnnotations: entity_view.entityAvailableAnnotations,
     images: entity_view.entityImages,
     name: entity_view.entityName
   }

@@ -136,12 +136,53 @@ def test_config_component_raises_exception_with_zero_matches(make_bidsfile):
         index.find_matches(bidsfiles, image_description)
 
 
-def test_correct_qc_entities_are_built():
+def test_correct_qc_entities_are_built(make_bidsfile):
     """
     Full test on behaviour of ConfigComponent
     Return the correct QCEntity's when given a list
     of BIDSFiles
     """
+
+    entities = {
+        "subject": ["A", "B"],
+        "description": ["x", "y"],
+        "suffix": ["T1w"],
+        "extension": [".nii.gz"]
+    }
+    bidsfiles = make_bidsfile(**entities)
+    component = {
+        "entities": ["subject"],
+        "name": "${subject} TEST",
+        "column": "HELLO",
+        "annotations": ["GOOD", "BAD"],
+        "images": [{
+            "desc": "x"
+        }, {
+            "desc": "y"
+        }]
+    }
+    config_component = index.ConfigComponent(**component)
+    result = config_component.build_qc_entities(bidsfiles)
+
+    expected_qc_entities = [
+        index.QCEntity(images=[
+            "sub-A/anat/sub-A_desc-x_T1w.nii.gz",
+            "sub-A/anat/sub-A_desc-y_T1w.nii.gz",
+        ],
+                       entities={"subject": "A"},
+                       tpl_name="${subject} TEST",
+                       tpl_column_name="HELLO"),
+        index.QCEntity(images=[
+            "sub-B/anat/sub-B_desc-x_T1w.nii.gz",
+            "sub-B/anat/sub-B_desc-y_T1w.nii.gz",
+        ],
+                       entities={"subject": "B"},
+                       tpl_name="${subject} TEST",
+                       tpl_column_name="HELLO"),
+    ]
+
+    assert len(result) == len(expected_qc_entities)
+    assert all([q for q in result if q in expected_qc_entities])
 
 
 def test_make_database_constructs_correct_qc_entity():
@@ -156,3 +197,7 @@ def test_is_subdict_returns_true_when_given_subset():
     Ensure that _test_subdict method is correctly checking
     if one dict is a subset of another
     """
+
+    small = {"x": 123}
+    big = {"x": 123, "y": 456}
+    assert index._is_subdict(big, small)

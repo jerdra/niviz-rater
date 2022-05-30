@@ -26,6 +26,17 @@ class MockBIDSFile:
         self.path = str(filename)
 
 
+def test_is_subdict_returns_true_when_given_subset():
+    """
+    Ensure that _test_subdict method is correctly checking
+    if one dict is a subset of another
+    """
+
+    small = {"x": 123}
+    big = {"x": 123, "y": 456}
+    assert index._is_subdict(big, small)
+
+
 @pytest.fixture
 def make_bidsfile():
     """
@@ -142,9 +153,9 @@ def test_qc_entities_returns_correct_column():
         "sub-A/anat/sub-A_desc-x_T1w.nii.gz",
         "sub-A/anat/sub-A_desc-y_T1w.nii.gz",
     ],
-                   entities={"subject": "A"},
-                   tpl_name="${subject} TEST",
-                   tpl_column_name="HELLO")
+                               entities={"subject": "A"},
+                               tpl_name="${subject} TEST",
+                               tpl_column_name="HELLO")
 
     assert qc_entity.name == "A TEST"
     assert qc_entity.column_name == "HELLO"
@@ -204,14 +215,3 @@ def test_make_database_constructs_correct_qc_entity():
     Ensure that the correct information is being created when
     converting a QCEntity into a database table
     """
-
-
-def test_is_subdict_returns_true_when_given_subset():
-    """
-    Ensure that _test_subdict method is correctly checking
-    if one dict is a subset of another
-    """
-
-    small = {"x": 123}
-    big = {"x": 123, "y": 456}
-    assert index._is_subdict(big, small)

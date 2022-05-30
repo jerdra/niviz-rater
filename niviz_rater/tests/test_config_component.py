@@ -136,6 +136,20 @@ def test_config_component_raises_exception_with_zero_matches(make_bidsfile):
         index.find_matches(bidsfiles, image_description)
 
 
+def test_qc_entities_returns_correct_column():
+
+    qc_entity = index.QCEntity(images=[
+        "sub-A/anat/sub-A_desc-x_T1w.nii.gz",
+        "sub-A/anat/sub-A_desc-y_T1w.nii.gz",
+    ],
+                   entities={"subject": "A"},
+                   tpl_name="${subject} TEST",
+                   tpl_column_name="HELLO")
+
+    assert qc_entity.name == "A TEST"
+    assert qc_entity.column_name == "HELLO"
+
+
 def test_correct_qc_entities_are_built(make_bidsfile):
     """
     Full test on behaviour of ConfigComponent

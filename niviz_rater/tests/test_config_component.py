@@ -208,10 +208,3 @@ def test_correct_qc_entities_are_built(make_bidsfile):
 
     assert len(result) == len(expected_qc_entities)
     assert all([q for q in result if q in expected_qc_entities])
-
-
-def test_make_database_constructs_correct_qc_entity():
-    """
-    Ensure that the correct information is being created when
-    converting a QCEntity into a database table
-    """

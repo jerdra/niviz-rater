@@ -51,36 +51,7 @@ class ConfigComponent:
         self.image_descriptors = images
         self.available_annotations = annotations
 
-    def _group_by_entities(self, bidsfiles):
-        """
-        Sort list of bidsfiles by requested entities
-        """
 
-        filtered = [
-            b for b in bidsfiles if all(k in b.entities for k in self.entities)
-        ]
-        return groupby(sorted(filtered,
-                              key=lambda x: _get_key(x, self.entities)),
-                       key=lambda x: _get_key(x, self.entities))
-
-    def find_matches(self, images, image_descriptor):
-
-        matches = [
-            b for b in images if _is_subdict(b.entities, image_descriptor)
-        ]
-        if len(matches) > 1:
-            logger.error(f"Got {len(matches)} matches to entity,"
-                         " expected 1!")
-            logger.error(f"Matching specification:\n {image_descriptor}")
-            print_matches = "\n".join([m.path for m in matches])
-            logger.error(f"{print_matches}")
-            raise ValueError
-
-        try:
-            return matches[0]
-        except IndexError:
-            logger.error(f"Found 0 matches for\n {image_descriptor}!")
-            raise
 
     def build_qc_entities(self, image_list):
         """
@@ -93,11 +64,11 @@ class ConfigComponent:
 
         qc_entities = []
 
-        for key, group in self._group_by_entities(image_list):
+        for key, group in _group_by_entities(image_list, self.entities):
             group_entities = list(group)
             try:
                 matched_images = [
-                    self.find_matches(group_entities, i)
+                    find_matches(group_entities, i)
                     for i in self.image_descriptors
                 ]
             except IndexError:
@@ -200,3 +171,31 @@ def _is_subdict(big, small):
 
 def _get_key(bidsfile, entities):
     return tuple([bidsfile.entities[e] for e in entities])
+
+
+def _group_by_entities(bidsfiles, entities):
+        filtered = [
+            b for b in bidsfiles if all(k in b.entities for k in entities)
+        ]
+        return groupby(sorted(filtered,
+                              key=lambda x: _get_key(x, entities)),
+                       key=lambda x: _get_key(x, entities))
+
+def find_matches(images, image_descriptor):
+
+    matches = [
+        b for b in images if _is_subdict(b.entities, image_descriptor)
+    ]
+    if len(matches) > 1:
+        logger.error(f"Got {len(matches)} matches to entity,"
+                     " expected 1!")
+        logger.error(f"Matching specification:\n {image_descriptor}")
+        print_matches = "\n".join([m.path for m in matches])
+        logger.error(f"{print_matches}")
+        raise ValueError
+
+    try:
+        return matches[0]
+    except IndexError:
+        logger.error(f"Found 0 matches for\n {image_descriptor}!")
+        raise

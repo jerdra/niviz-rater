@@ -5,6 +5,10 @@ RowDescription:
   name: str(min = 1)
 
 Components: list(include('Component'), min = 1)
+
+DefaultRating: str(required=False, none=False)
+QCOptions: list(include('qcoption'), required=False, none=False)
+
 ---
 Component:
   entities: list(include('entity'), min = 1)
@@ -18,3 +22,5 @@ entity: Entities()
 image: map(str(exclude = '!?{}'), str(exclude = '!?{}'))
 
 annotation: list(str(exclude = '!?{}', min = 1))
+
+qcoption: str(min = 1)

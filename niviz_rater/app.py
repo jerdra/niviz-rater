@@ -13,7 +13,7 @@ from threading import Thread
 from functools import partial
 
 from niviz_rater.api import apiRoutes
-from niviz_rater.db import fetch_db_from_config
+from niviz_rater.db.utils import fetch_db_from_config
 from niviz_rater.index import build_index
 from niviz_rater.utils import get_qc_bidsfiles, update_bids_configuration
 

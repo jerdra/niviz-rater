@@ -44,14 +44,13 @@ class ConfigComponent:
     Configurable Factory class for building QC components
     from list of images
     """
+
     def __init__(self, entities, name, column, images, annotations):
         self.entities = entities
         self.name = name
         self.column = column
         self.image_descriptors = images
         self.available_annotations = annotations
-
-
 
     def build_qc_entities(self, image_list):
         """
@@ -120,6 +119,8 @@ def initialize_db_ratings(db):
     return default_rating
 
 
+# TODO: Move into DB-specific module with simpler read/write operations
+# TODO: Not very testable!
 def make_database(db, entities, available_annotations, row_tpl,
                   default_rating):
     """
@@ -174,18 +175,14 @@ def _get_key(bidsfile, entities):
 
 
 def _group_by_entities(bidsfiles, entities):
-        filtered = [
-            b for b in bidsfiles if all(k in b.entities for k in entities)
-        ]
-        return groupby(sorted(filtered,
-                              key=lambda x: _get_key(x, entities)),
-                       key=lambda x: _get_key(x, entities))
+    filtered = [b for b in bidsfiles if all(k in b.entities for k in entities)]
+    return groupby(sorted(filtered, key=lambda x: _get_key(x, entities)),
+                   key=lambda x: _get_key(x, entities))
+
 
 def find_matches(images, image_descriptor):
 
-    matches = [
-        b for b in images if _is_subdict(b.entities, image_descriptor)
-    ]
+    matches = [b for b in images if _is_subdict(b.entities, image_descriptor)]
     if len(matches) > 1:
         logger.error(f"Got {len(matches)} matches to entity,"
                      " expected 1!")

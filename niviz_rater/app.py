@@ -13,7 +13,7 @@ from threading import Thread
 from functools import partial
 
 from niviz_rater.api import apiRoutes
-from niviz_rater.db.utils import fetch_db_from_config
+from niviz_rater.db.utils import fetch_db_from_config, initialize_tables
 from niviz_rater.index import build_index
 from niviz_rater.utils import get_qc_bidsfiles, update_bids_configuration
 
@@ -29,8 +29,23 @@ FILE = Path(__file__).parent
 DEFAULT_BIDS_CONFIGURATION = FILE / "data/bids.json"
 
 
-def is_subcommand(func: Callable):
+def extract_db_settings_from_spec(
+        qc_spec: Dict[str, Any]) -> (Dict[str, Any], Dict[str, Any]):
+    """
+    Separate out database settings from
+    the QC specification
+    """
 
+    keys = ['DefaultRating', 'Rating', 'DefaultAnnotation']
+    db_settings = {}
+    for k in keys:
+        if k in qc_spec:
+            db_settings[k] = qc_spec.pop(k)
+
+    return qc_spec, db_settings
+
+
+def is_subcommand(func: Callable):
     def _wrapped(args):
         try:
             extracted = {
@@ -85,9 +100,14 @@ def launch_fileserver(base_directory, port=5002, hostname='localhost'):
 
 
 @is_subcommand
-def initialize_db(qc_spec: Dict[str, Any], bids_files: Iterable[str]) -> None:
+def initialize_db(db_settings: Dict[str, Any], qc_spec: Dict[str, Any],
+                  bids_files: Iterable[str]) -> None:
 
     db = fetch_db_from_config(app.config)
+
+    logging.info("Creating Database tables...")
+    initialize_tables(db, db_settings)
+
     logging.info("Building Index of QC images")
     build_index(db, bids_files, qc_spec)
 
@@ -159,6 +179,8 @@ def main():
     bids_configs = update_bids_configuration(args.bids_settings)
 
     qc_spec = validate_config(args.qc_specification_file, bids_configs)
+    qc_spec, db_settings = extract_db_settings_from_spec(qc_spec)
+
     bids_files = get_qc_bidsfiles(args.base_directory, qc_spec)
 
     # Setup application configuration and DB
@@ -170,6 +192,8 @@ def main():
 
     args.qc_spec = qc_spec
     args.bids_files = bids_files
+    args.db_settings = db_settings
+
     args.func(args)
 
 

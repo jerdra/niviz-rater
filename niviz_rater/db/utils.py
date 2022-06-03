@@ -1,5 +1,6 @@
 from peewee import SqliteDatabase
 from typing import Any, List, Optional, Callable
+import niviz_rater.models as models
 
 
 def get_or_create_db(
@@ -26,3 +27,21 @@ def fetch_db_from_config(app_config,
         'niviz_rater.db.instance',
         get_or_create_db(app_config['niviz_rater.db.file'],
                          additional_pragmas))
+
+def initialize_tables(db: SqliteDatabase, settings: Dict[str, Any]) -> SqliteDatabase:
+    """
+    Initialize the Niviz database table with a given
+    set of settings
+    """
+
+    db.create_tables([models.Component, models.Annotation,
+        models.Rating, models.TableColumn, models.TableRow,
+        models.Entity, models.Image])
+
+    # Pre-construct the Ratings table
+    with db.atomic():
+        Rating.create(name=settings["DefaultRating"])
+        [Rating.create(name=r) for r in settings["Ratings"]]
+
+    return db
+

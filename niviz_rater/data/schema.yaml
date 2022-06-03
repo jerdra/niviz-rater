@@ -6,8 +6,9 @@ RowDescription:
 
 Components: list(include('Component'), min = 1)
 
+DefaultAnnotation: str(required=False, none=False)
+Ratings: list(include('qcoption'), required=False, none=False)
 DefaultRating: str(required=False, none=False)
-QCOptions: list(include('qcoption'), required=False, none=False)
 
 ---
 Component:

@@ -5,7 +5,6 @@ database_proxy = DatabaseProxy()
 
 
 class BaseModel(Model):
-
     class Meta:
         database = database_proxy
 
@@ -14,6 +13,8 @@ class Component(BaseModel):
     '''
     Component component ID
     '''
+
+    name = CharField(unique=True)
 
 
 class Annotation(BaseModel):
@@ -28,7 +29,7 @@ class Rating(BaseModel):
     '''
     Pass/Fail/Uncertain/None ratings
     '''
-    name = CharField()
+    name = CharField(unique=True)
 
 
 class TableColumn(BaseModel):

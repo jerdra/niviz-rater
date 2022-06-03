@@ -27,12 +27,12 @@ class QCEntity:
     """
     images: list
     entities: dict
-    tpl_name: str
+    tpl_label: str
     tpl_column_name: str
 
     @property
     def name(self):
-        return Template(self.tpl_name).substitute(self.entities)
+        return Template(self.tpl_label).substitute(self.entities)
 
     @property
     def column_name(self):
@@ -45,9 +45,10 @@ class ConfigComponent:
     from list of images
     """
 
-    def __init__(self, entities, name, column, images, annotations):
-        self.entities = entities
+    def __init__(self, name, entities, label, column, images, annotations):
         self.name = name
+        self.entities = entities
+        self.label = label
         self.column = column
         self.image_descriptors = images
         self.available_annotations = annotations
@@ -80,7 +81,7 @@ class ConfigComponent:
                              k: matched_images[0].entities[k]
                              for k in self.entities
                          },
-                         tpl_name=self.name,
+                         tpl_label=self.label,
                          tpl_column_name=self.column))
 
         return qc_entities

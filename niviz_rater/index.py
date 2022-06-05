@@ -106,8 +106,6 @@ def make_rowname(rowtpl, entities):
     return rowtpl.tpl.substitute(keys)
 
 
-# TODO: Move into DB-specific module with simpler read/write operations
-# TODO: Not very testable!
 def make_database(db, entities, available_annotations, row_tpl):
     """
     Add tables and data to database

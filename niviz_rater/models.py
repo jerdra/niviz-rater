@@ -1,10 +1,19 @@
+"""
+Niviz Data Models
+"""
+
+from __future__ import annotations
+import logging
 from peewee import (Model, ForeignKeyField, TextField, CharField,
-                    DatabaseProxy)
+                    DatabaseProxy, IntegrityError)
+
+logger = logging.getLogger(__name__)
 
 database_proxy = DatabaseProxy()
 
 
 class BaseModel(Model):
+
     class Meta:
         database = database_proxy
 
@@ -16,13 +25,38 @@ class Component(BaseModel):
 
     name = CharField(unique=True)
 
+    def add_annotation(self, annotation_name: str) -> Annotation:
+        """
+        Add an annotation to a component
+        """
+
+        annotation = Annotation.create(name=annotation_name,
+                                       component=self.get_id())
+        try:
+            annotation.save()
+        except IntegrityError:
+            logger.error(f"Annotation {annotation_name} already exists for "
+                         f"component {self.name}!")
+            logger.error("Skipping creation...")
+            intended_annot = Annotation.get(
+                Annotation.component == self.get_id())
+            return intended_annot
+
+        return annotation
+
 
 class Annotation(BaseModel):
     '''
     Annotation ID --> named rating mapping
     '''
     name = CharField()
-    component = ForeignKeyField(Component, null=False, backref='+')
+    component = ForeignKeyField(Component, null=False, backref='annotations')
+
+    class Meta:
+        database = database_proxy
+
+        # Unique constraint on name-component tuples
+        indexes = ((("name", "component"), True), )
 
 
 class Rating(BaseModel):

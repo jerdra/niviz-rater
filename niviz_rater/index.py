@@ -95,11 +95,10 @@ def build_index(db: SqliteDatabase, bids_files: Iterable[str],
     row_tpl = AxisNameTpl(Template(qc_spec['RowDescription']['name']),
                           qc_spec['RowDescription']['entities'])
 
-    default_rating = initialize_db_ratings(db)
     for c in qc_spec['Components']:
         component = ConfigComponent(**c)
         make_database(db, component.build_qc_entities(bids_files),
-                      component.available_annotations, row_tpl, default_rating)
+                      component.available_annotations, row_tpl)
 
 
 def make_rowname(rowtpl, entities):
@@ -107,29 +106,12 @@ def make_rowname(rowtpl, entities):
     return rowtpl.tpl.substitute(keys)
 
 
-def initialize_db_ratings(db):
-    """
-    Set-up Ratings table in database
-    """
-
-    Rating.create_table()
-    with db.atomic():
-        default_rating = Rating.create(name="None")
-        [Rating.create(name=r) for r in ["Pass", "Fail", "Uncertain"]]
-
-    return default_rating
-
-
 # TODO: Move into DB-specific module with simpler read/write operations
 # TODO: Not very testable!
-def make_database(db, entities, available_annotations, row_tpl,
-                  default_rating):
+def make_database(db, entities, available_annotations, row_tpl):
     """
     Add tables and data to database
     """
-    # First create necessary tables
-    db.create_tables(
-        [Component, Annotation, Entity, Image, TableRow, TableColumn])
 
     # Step 0: We'll create our component and annotations
     with db.atomic():
@@ -159,7 +141,7 @@ def make_database(db, entities, available_annotations, row_tpl,
                                    rowname=make_rowname(row_tpl, e.entities),
                                    columnname=e.column_name,
                                    annotation=default_annotation.id,
-                                   rating=default_rating.id)
+                                   rating="None")
             [image_inserts.append((i, entity.id)) for i in e.images]
 
     with db.atomic():

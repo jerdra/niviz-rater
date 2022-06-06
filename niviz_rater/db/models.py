@@ -4,6 +4,7 @@ Niviz Data Models
 
 from __future__ import annotations
 from pathlib import Path
+from typing import Union
 import logging
 from peewee import (Model, ForeignKeyField, TextField, CharField,
                     DatabaseProxy, IntegrityError)
@@ -121,6 +122,24 @@ class Entity(Model):
             return intended_image
 
         return image
+
+    def update_annotation(self, annotation: Union[str, Annotation]):
+        """
+        Update the Entity's annotation
+        """
+        raise NotImplementedError
+
+    def update_rating(self, rating: Union[str, Rating]):
+        """
+        Update the Entity's Rating
+        """
+        raise NotImplementedError
+
+    def update_comment(self, comment: str):
+        """
+        Update the Entity's comment
+        """
+        raise NotImplementedError
 
 
 class Image(BaseModel):

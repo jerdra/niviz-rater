@@ -3,6 +3,7 @@ Niviz Data Models
 """
 
 from __future__ import annotations
+from pathlib import Path
 import logging
 from peewee import (Model, ForeignKeyField, TextField, CharField,
                     DatabaseProxy, IntegrityError)
@@ -39,7 +40,8 @@ class Component(BaseModel):
                          f"component {self.name}!")
             logger.error("Skipping creation...")
             intended_annot = Annotation.get(
-                Annotation.component == self.get_id())
+                (Annotation.component == self.get_id())
+                & (Annotation.name == annotation_name))
             return intended_annot
 
         return annotation
@@ -104,6 +106,22 @@ class Entity(Model):
 
         return (annotation, rating, self.comment or "")
 
+    def add_image(self, image_path: Path) -> Image:
+        """
+        Add image to Entity
+        """
+        image = Image(path=image_path, entity=self.get_id())
+        try:
+            image.save()
+        except IntegrityError:
+            logger.error(f"Image { image_path } is already being used for"
+                         f" the Entity { self.name }")
+            intended_image = Image.get((Image.path == image_path)
+                                       & (Image.entity == self.get_id()))
+            return intended_image
+
+        return image
+
 
 class Image(BaseModel):
     '''
@@ -111,3 +129,9 @@ class Image(BaseModel):
     '''
     path = TextField(unique=True)
     entity = ForeignKeyField(Entity, backref='images')
+
+    class Meta:
+        database = database_proxy
+
+        # Unique constraint on name-component tuples
+        indexes = ((("name", "entity"), True), )

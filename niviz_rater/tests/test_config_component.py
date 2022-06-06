@@ -154,7 +154,7 @@ def test_qc_entities_returns_correct_column():
         "sub-A/anat/sub-A_desc-y_T1w.nii.gz",
     ],
                                entities={"subject": "A"},
-                               tpl_name="${subject} TEST",
+                               tpl_label="${subject} TEST",
                                tpl_column_name="HELLO")
 
     assert qc_entity.name == "A TEST"
@@ -176,8 +176,9 @@ def test_correct_qc_entities_are_built(make_bidsfile):
     }
     bidsfiles = make_bidsfile(**entities)
     component = {
+        "name": "TESTING",
         "entities": ["subject"],
-        "name": "${subject} TEST",
+        "label": "${subject} TEST",
         "column": "HELLO",
         "annotations": ["GOOD", "BAD"],
         "images": [{
@@ -195,14 +196,14 @@ def test_correct_qc_entities_are_built(make_bidsfile):
             "sub-A/anat/sub-A_desc-y_T1w.nii.gz",
         ],
                        entities={"subject": "A"},
-                       tpl_name="${subject} TEST",
+                       tpl_label="${subject} TEST",
                        tpl_column_name="HELLO"),
         index.QCEntity(images=[
             "sub-B/anat/sub-B_desc-x_T1w.nii.gz",
             "sub-B/anat/sub-B_desc-y_T1w.nii.gz",
         ],
                        entities={"subject": "B"},
-                       tpl_name="${subject} TEST",
+                       tpl_label="${subject} TEST",
                        tpl_column_name="HELLO"),
     ]
 

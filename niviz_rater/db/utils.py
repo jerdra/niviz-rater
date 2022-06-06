@@ -1,6 +1,6 @@
 from peewee import SqliteDatabase
 from typing import Any, List, Optional, Dict
-import niviz_rater.models as models
+import niviz_rater.db.models as models
 
 
 def get_or_create_db(

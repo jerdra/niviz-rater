@@ -12,7 +12,7 @@ from typing import Iterable, Dict, Any
 
 from peewee import SqliteDatabase
 
-from niviz_rater.models import (Entity, Rating, Annotation, Image, Component,
+from niviz_rater.db.models import (Entity, Rating, Annotation, Image, Component,
                                 TableRow, TableColumn)
 
 logger = logging.getLogger(__name__)

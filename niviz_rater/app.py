@@ -19,7 +19,7 @@ from niviz_rater.utils import get_qc_bidsfiles, update_bids_configuration
 
 from niviz_rater.validation import validate_config
 
-from niviz_rater.models import database_proxy
+from niviz_rater.db.models import database_proxy
 
 logger = logging.getLogger(__file__)
 

@@ -124,13 +124,24 @@ class Entity(Model):
 
         return image
 
-    def update_annotation(self, annotation: Union[str, Annotation]):
+    def update_annotation(self,
+                          annotation: Union[str, Annotation],
+                          create=False):
         """
-        Update the Entity's annotation
+        Update the Entity's annotation, can add new annotation
+        if create=True
         """
         if isinstance(annotation, str):
+            annotation_str = annotation
             annotation = Annotation.get((Annotation.name == annotation) & (
                 Annotation.component == self.component))
+            if not create:
+                logger.error(f"Annotation {annotation_str} not available"
+                             " for Component: {self.component.name}")
+                logger.error("Failed to update annotation!")
+                return
+            else:
+                annotation = self.component.add_annotation(annotation)
 
         self.annotation = annotation
         return

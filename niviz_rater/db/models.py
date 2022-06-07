@@ -133,15 +133,25 @@ class Entity(Model):
         """
         if isinstance(annotation, str):
             annotation_str = annotation
-            annotation = Annotation.get((Annotation.name == annotation) & (
-                Annotation.component == self.component))
-            if not create:
-                logger.error(f"Annotation {annotation_str} not available"
-                             " for Component: {self.component.name}")
-                logger.error("Failed to update annotation!")
-                return
-            else:
-                annotation = self.component.add_annotation(annotation)
+
+            try:
+                annotation = Annotation.get((Annotation.name == annotation) & (
+                    Annotation.component == self.component))
+            except Annotation.model.DoesNotExist:
+                logger.warning(f"Annotation {annotation_str} not available"
+                               " for Component: {self.component.name}")
+                if not create:
+                    logger.error("Failed to update annotation!")
+                    return
+                else:
+                    logger.info(f"Creating annotation: {annotation_str}")
+                    annotation = self.component.add_annotation(annotation)
+
+        elif isinstance(annotation, Annotation):
+            if annotation.component != self.component:
+                logger.error(
+                    "Invalid Annotation given for {self.component.name}")
+                raise ValueError
 
         self.annotation = annotation
         return
@@ -150,13 +160,23 @@ class Entity(Model):
         """
         Update the Entity's Rating
         """
-        raise NotImplementedError
+
+        if isinstance(rating, str):
+            rating_str = rating
+            try:
+                rating = Rating.get(Rating.name == rating)
+            except Rating.DoesNotExist:
+                logger.error(f"Invalid rating {rating_str}")
+                return
+
+        logger.info("Setting rating for {self.name} to {rating.name}")
+        self.rating = rating
 
     def update_comment(self, comment: str):
         """
         Update the Entity's comment
         """
-        raise NotImplementedError
+        self.comment = comment.strip('\n').strip(' ')
 
 
 class Image(BaseModel):

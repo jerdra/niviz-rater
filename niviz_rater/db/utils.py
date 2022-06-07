@@ -43,7 +43,8 @@ def initialize_tables(db: SqliteDatabase,
 
     # Pre-construct the Ratings table
     with db.atomic():
-        models.Rating.create(name=settings["DefaultRating"])
-        [models.Rating.create(name=r) for r in settings["Ratings"]]
+        for rating in settings['Rating']:
+            models.Rating.create(
+                name=rating, is_default=settings['DefaultRating'] == rating)
 
     return db

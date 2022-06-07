@@ -6,7 +6,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Union
 import logging
-from peewee import (Model, ForeignKeyField, TextField, CharField,
+from peewee import (Model, ForeignKeyField, TextField, CharField, BooleanField,
                     DatabaseProxy, IntegrityError)
 
 logger = logging.getLogger(__name__)
@@ -32,8 +32,7 @@ class Component(BaseModel):
         Add an annotation to a component
         """
 
-        annotation = Annotation.create(name=annotation_name,
-                                       component=self.get_id())
+        annotation = Annotation.create(name=annotation_name, component=self)
         try:
             annotation.save()
         except IntegrityError:
@@ -41,7 +40,7 @@ class Component(BaseModel):
                          f"component {self.name}!")
             logger.error("Skipping creation...")
             intended_annot = Annotation.get(
-                (Annotation.component == self.get_id())
+                (Annotation.component == self)
                 & (Annotation.name == annotation_name))
             return intended_annot
 
@@ -54,6 +53,7 @@ class Annotation(BaseModel):
     '''
     name = CharField()
     component = ForeignKeyField(Component, null=False, backref='annotations')
+    is_default = BooleanField(default=False)
 
     class Meta:
         database = database_proxy
@@ -67,6 +67,7 @@ class Rating(BaseModel):
     Pass/Fail/Uncertain/None ratings
     '''
     name = CharField(unique=True)
+    is_default = BooleanField(default=False)
 
 
 class TableColumn(BaseModel):
@@ -111,14 +112,14 @@ class Entity(Model):
         """
         Add image to Entity
         """
-        image = Image(path=image_path, entity=self.get_id())
+        image = Image(path=image_path, entity=self)
         try:
             image.save()
         except IntegrityError:
             logger.error(f"Image { image_path } is already being used for"
                          f" the Entity { self.name }")
             intended_image = Image.get((Image.path == image_path)
-                                       & (Image.entity == self.get_id()))
+                                       & (Image.entity == self))
             return intended_image
 
         return image
@@ -127,7 +128,12 @@ class Entity(Model):
         """
         Update the Entity's annotation
         """
-        raise NotImplementedError
+        if isinstance(annotation, str):
+            annotation = Annotation.get((Annotation.name == annotation) & (
+                Annotation.component == self.component))
+
+        self.annotation = annotation
+        return
 
     def update_rating(self, rating: Union[str, Rating]):
         """
@@ -152,5 +158,5 @@ class Image(BaseModel):
     class Meta:
         database = database_proxy
 
-        # Unique constraint on name-component tuples
-        indexes = ((("name", "entity"), True), )
+        # Unique constraint on path-entity tuples
+        indexes = ((("path", "entity"), True), )

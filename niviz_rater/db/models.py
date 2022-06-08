@@ -32,7 +32,7 @@ class Component(BaseModel):
         Add an annotation to a component
         """
 
-        annotation = Annotation.create(name=annotation_name, component=self)
+        annotation = Annotation(name=annotation_name, component=self)
         try:
             annotation.save()
         except IntegrityError:
@@ -71,11 +71,11 @@ class Rating(BaseModel):
 
 
 class TableColumn(BaseModel):
-    name = CharField(primary_key=True)
+    name = CharField()
 
 
 class TableRow(BaseModel):
-    name = CharField(primary_key=True)
+    name = CharField()
 
 
 class Entity(Model):
@@ -112,13 +112,13 @@ class Entity(Model):
         """
         Add image to Entity
         """
-        image = Image(path=image_path, entity=self)
+        image = Image(path=str(image_path), entity=self)
         try:
             image.save()
         except IntegrityError:
             logger.error(f"Image { image_path } is already being used for"
                          f" the Entity { self.name }")
-            intended_image = Image.get((Image.path == image_path)
+            intended_image = Image.get((Image.path == str(image_path))
                                        & (Image.entity == self))
             return intended_image
 
@@ -137,7 +137,7 @@ class Entity(Model):
             try:
                 annotation = Annotation.get((Annotation.name == annotation) & (
                     Annotation.component == self.component))
-            except Annotation.model.DoesNotExist:
+            except Annotation.DoesNotExist:
                 logger.warning(f"Annotation {annotation_str} not available"
                                " for Component: {self.component.name}")
                 if not create:

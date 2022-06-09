@@ -8,12 +8,10 @@ import logging
 from string import Template
 from dataclasses import dataclass
 from collections import namedtuple
-from typing import Iterable, Dict, Any
+from typing import Iterable, Dict, Any, List
 
 from peewee import SqliteDatabase
-
-from niviz_rater.db.models import (Entity, Rating, Annotation, Image, Component,
-                                TableRow, TableColumn)
+import niviz_rater.db.queries as queries
 
 logger = logging.getLogger(__name__)
 
@@ -96,9 +94,15 @@ def build_index(db: SqliteDatabase, bids_files: Iterable[str],
                           qc_spec['RowDescription']['entities'])
 
     for c in qc_spec['Components']:
-        component = ConfigComponent(**c)
-        make_database(db, component.build_qc_entities(bids_files),
-                      component.available_annotations, row_tpl)
+        config_component = ConfigComponent(**c)
+
+        with db.atomic():
+            queries.get_component(config_component.name, create=True)
+            add_annotations_to_component(
+                config_component.name, config_component.available_annotations)
+
+        make_database(db, config_component.build_qc_entities(bids_files),
+                      config_component.available_annotations, row_tpl)
 
 
 def make_rowname(rowtpl, entities):
@@ -106,20 +110,15 @@ def make_rowname(rowtpl, entities):
     return rowtpl.tpl.substitute(keys)
 
 
+def add_annotations_to_component(component: str, annotations: List[str]):
+    for annotation in annotations:
+        queries.add_annotation_to_component(component, annotation)
+
+
 def make_database(db, entities, available_annotations, row_tpl):
     """
     Add tables and data to database
     """
-
-    # Step 0: We'll create our component and annotations
-    with db.atomic():
-        component = Component.create()
-        default_annotation = Annotation.create(name="No Rating",
-                                               component=component.id)
-        [
-            Annotation.create(name=r, component=component.id)
-            for r in available_annotations
-        ]
 
     # Step 1: Get set of row names to use and save in dictionary
     unique_rows = set([make_rowname(row_tpl, e.entities) for e in entities])

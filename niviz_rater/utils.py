@@ -36,37 +36,3 @@ def get_qc_bidsfiles(qc_dataset: str, qc_spec: dict) -> List[str]:
                         config=["user"])
     bidsfiles = layout.get(extension=qc_spec['ImageExtensions'])
     return bidsfiles
-
-
-def get_db_settings(settings: Dict[str, Any] = {}) -> Dict[str, Any]:
-    """
-    Get DB ratings defaults
-    """
-
-    import niviz_rater.data
-
-    config_parser = configparser.ConfigParser()
-    with pkg_resources.path(niviz_rater.data, "db_defaults.cfg") as p:
-        config_parser.read(p)
-
-    db_settings = {
-        "DefaultAnnotation":
-        _remove_quotes(config_parser.get("qc-settings", "default_annotation")),
-        "DefaultRating":
-        _remove_quotes(config_parser.get("qc-settings", "default_rating")),
-        "Ratings":
-        _remove_empty(
-            _remove_quotes(config_parser.get("qc-settings",
-                                             "ratings")).split("\n"))
-    }
-
-    db_settings.update(settings)
-    return db_settings
-
-
-def _remove_quotes(text: str) -> str:
-    return text.replace("'", "").replace('"', "")
-
-
-def _remove_empty(texts: List[str]) -> List[str]:
-    return [t for t in texts if t]

@@ -1,4 +1,4 @@
-from typing import Iterable, Any, Dict, Callable
+from typing import Iterable, Any, Dict, Callable, List
 
 from bottle import route, run, static_file, debug, default_app
 
@@ -27,16 +27,17 @@ app = default_app()
 
 FILE = Path(__file__).parent
 DEFAULT_BIDS_CONFIGURATION = FILE / "data/bids.json"
+CONFIGURABLE_DB_SETTINGS = ['Rating']
 
 
 def extract_db_settings_from_spec(
-        qc_spec: Dict[str, Any]) -> (Dict[str, Any], Dict[str, Any]):
+        qc_spec: Dict[str, Any],
+        keys: List[str]) -> (Dict[str, Any], Dict[str, Any]):
     """
     Separate out database settings from
     the QC specification
     """
 
-    keys = ['DefaultRating', 'Rating', 'DefaultAnnotation']
     db_settings = {}
     for k in keys:
         if k in qc_spec:
@@ -46,6 +47,7 @@ def extract_db_settings_from_spec(
 
 
 def is_subcommand(func: Callable):
+
     def _wrapped(args):
         try:
             extracted = {
@@ -179,7 +181,9 @@ def main():
     bids_configs = update_bids_configuration(args.bids_settings)
 
     qc_spec = validate_config(args.qc_specification_file, bids_configs)
-    qc_spec, db_settings = extract_db_settings_from_spec(qc_spec)
+
+    qc_spec, db_settings = extract_db_settings_from_spec(
+        qc_spec, CONFIGURABLE_DB_SETTINGS)
 
     bids_files = get_qc_bidsfiles(args.base_directory, qc_spec)
 

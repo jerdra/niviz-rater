@@ -46,7 +46,7 @@ def test_entity_entry_formatted_correctly(db):
     annotation_name = "12345"
     rating_name = "A"
     comment = "A COMMENT"
-    settings = {"Rating": ["A", "B", "C", "D"], "DefaultRating": "A"}
+    settings = {"Ratings": ["A", "B", "C", "D"]}
 
     db = dbutils.initialize_tables(db, settings)
 
@@ -79,7 +79,7 @@ def test_entity_add_image_updates_db(db):
     annotation_name = "12345"
     rating_name = "A"
     comment = "A COMMENT"
-    settings = {"Rating": ["A", "B", "C", "D"], "DefaultRating": "A"}
+    settings = {"Ratings": ["A", "B", "C", "D"]}
 
     db = dbutils.initialize_tables(db, settings)
 
@@ -119,7 +119,7 @@ def test_adding_same_image_to_entity_returns_same_image(db):
     annotation_name = "12345"
     rating_name = "A"
     comment = "A COMMENT"
-    settings = {"Rating": ["A", "B", "C", "D"], "DefaultRating": "A"}
+    settings = {"Ratings": ["A", "B", "C", "D"]}
 
     db = dbutils.initialize_tables(db, settings)
 
@@ -156,7 +156,7 @@ def test_entity_update_annotation_sets_correctly_if_configured(db):
     annotation_name = "12345"
     rating_name = "A"
     comment = "A COMMENT"
-    settings = {"Rating": ["A", "B", "C", "D"], "DefaultRating": "A"}
+    settings = {"Ratings": ["A", "B", "C", "D"]}
 
     db = dbutils.initialize_tables(db, settings)
 
@@ -198,7 +198,7 @@ def test_entity_update_annotation_creates_if_flag_set(db):
     annotation_name = "12345"
     rating_name = "A"
     comment = "A COMMENT"
-    settings = {"Rating": ["A", "B", "C", "D"], "DefaultRating": "A"}
+    settings = {"Ratings": ["A", "B", "C", "D"]}
 
     db = dbutils.initialize_tables(db, settings)
 
@@ -237,7 +237,7 @@ def test_entity_update_annotation_does_nothing_if_flag_not_set(db):
     annotation_name = "12345"
     rating_name = "A"
     comment = "A COMMENT"
-    settings = {"Rating": ["A", "B", "C", "D"], "DefaultRating": "A"}
+    settings = {"Ratings": ["A", "B", "C", "D"]}
 
     db = dbutils.initialize_tables(db, settings)
 
@@ -275,7 +275,7 @@ def test_entity_update_rating_sets_if_rating_exists(db):
     annotation_name = "12345"
     rating_name = "A"
     comment = "A COMMENT"
-    settings = {"Rating": ["A", "B", "C", "D"], "DefaultRating": "A"}
+    settings = {"Ratings": ["A", "B", "C", "D"]}
 
     db = dbutils.initialize_tables(db, settings)
 
@@ -311,7 +311,7 @@ def test_entity_update_rating_does_nothing_if_rating_invalid(db):
     annotation_name = "12345"
     rating_name = "A"
     comment = "A COMMENT"
-    settings = {"Rating": ["A", "B", "C", "D"], "DefaultRating": "A"}
+    settings = {"Ratings": ["A", "B", "C", "D"]}
 
     db = dbutils.initialize_tables(db, settings)
 

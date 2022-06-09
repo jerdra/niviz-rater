@@ -85,8 +85,8 @@ class Entity(Model):
     rowname = ForeignKeyField(TableRow, null=False, backref='entities')
     component = ForeignKeyField(Component, null=False, backref='+')
     comment = TextField(default="")
-    rating = ForeignKeyField(Rating, null=False, backref='+')
-    annotation = ForeignKeyField(Annotation, null=False, backref='+')
+    rating = ForeignKeyField(Rating, backref='+')
+    annotation = ForeignKeyField(Annotation, backref='+')
 
     class Meta:
         database = database_proxy

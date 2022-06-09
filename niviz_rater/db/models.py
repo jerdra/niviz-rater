@@ -6,7 +6,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Union
 import logging
-from peewee import (Model, ForeignKeyField, TextField, CharField, BooleanField,
+from peewee import (Model, ForeignKeyField, TextField, CharField,
                     DatabaseProxy, IntegrityError)
 
 logger = logging.getLogger(__name__)
@@ -53,7 +53,6 @@ class Annotation(BaseModel):
     '''
     name = CharField()
     component = ForeignKeyField(Component, null=False, backref='annotations')
-    is_default = BooleanField(default=False)
 
     class Meta:
         database = database_proxy
@@ -67,7 +66,6 @@ class Rating(BaseModel):
     Pass/Fail/Uncertain/None ratings
     '''
     name = CharField(unique=True)
-    is_default = BooleanField(default=False)
 
 
 class TableColumn(BaseModel):

@@ -3,7 +3,8 @@ Niviz-Rater Spec representation module
 """
 
 from __future__ import annotations
-from typing import List, NamedTuple, TYPE_CHECKING
+from typing import (List, NamedTuple, TYPE_CHECKING, Dict, Any, Tuple,
+                    Iterable, Optional)
 
 from dataclasses import dataclass
 from string import Template
@@ -19,6 +20,9 @@ logger = logging.getLogger(__name__)
 class RowDescription(NamedTuple):
     entities: List[str]
     name: Template
+
+
+DBSettings = Dict[str, Any]
 
 
 @dataclass
@@ -148,3 +152,36 @@ def find_matches(images, image_descriptor):
     except IndexError:
         logger.error(f"Found 0 matches for\n {image_descriptor}!")
         raise
+
+
+def process_config(
+        config: ValidConfig
+) -> Tuple[ConfigGlobals, Iterable[ConfigComponent]]:
+    """
+    Process a validated Niviz-Rater spec into its constitutent:
+        - global settings
+        - db settings
+        - an iterable of configcomponents
+    """
+
+    config_global = ConfigGlobals.from_config(config)
+    components = ConfigComponent.yield_from_config(config)
+    return config_global, components
+
+
+def db_settings_from_config(config: ValidConfig,
+                            keys: List[str]) -> Optional[DBSettings]:
+    """
+    Separate out database settings from
+    the QC specification
+    """
+
+    db_settings = {}
+    for k in keys:
+        if k in config:
+            db_settings[k] = config[k]
+
+    if not db_settings:
+        return None
+
+    return db_settings

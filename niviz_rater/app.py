@@ -1,4 +1,4 @@
-from typing import Iterable, Any, Dict, Callable, List
+from typing import Iterable, Any, Dict, Callable
 
 from bottle import route, run, static_file, debug, default_app
 
@@ -16,7 +16,7 @@ from niviz_rater.api import apiRoutes
 from niviz_rater.db.utils import fetch_db_from_config, initialize_tables
 from niviz_rater.index import build_index
 from niviz_rater.utils import (get_qc_bidsfiles, update_bids_configuration)
-from niviz_rater.spec import db_settings_from_config, process_config
+from niviz_rater.spec import Config, db_settings_from_config
 
 from niviz_rater.validation import validate_config
 
@@ -29,22 +29,6 @@ app = default_app()
 FILE = Path(__file__).parent
 DEFAULT_BIDS_CONFIGURATION = FILE / "data/bids.json"
 CONFIGURABLE_DB_SETTINGS = ['Ratings']
-
-
-def extract_db_settings_from_spec(
-        qc_spec: Dict[str, Any],
-        keys: List[str]) -> (Dict[str, Any], Dict[str, Any]):
-    """
-    Separate out database settings from
-    the QC specification
-    """
-
-    db_settings = {}
-    for k in keys:
-        if k in qc_spec:
-            db_settings[k] = qc_spec.pop(k)
-
-    return qc_spec, db_settings
 
 
 def is_subcommand(func: Callable):
@@ -103,7 +87,7 @@ def launch_fileserver(base_directory, port=5002, hostname='localhost'):
 
 
 @is_subcommand
-def initialize_db(db_settings: Dict[str, Any], qc_spec: Dict[str, Any],
+def initialize_db(db_settings: Dict[str, Any], config: Config,
                   bids_files: Iterable[str]) -> None:
 
     db = fetch_db_from_config(app.config)
@@ -112,7 +96,7 @@ def initialize_db(db_settings: Dict[str, Any], qc_spec: Dict[str, Any],
     initialize_tables(db, db_settings)
 
     logging.info("Building Index of QC images")
-    build_index(db, bids_files, qc_spec)
+    # build_index(db, bids_files, qc_spec)
 
 
 @is_subcommand
@@ -181,11 +165,12 @@ def main():
     args = parser.parse_args()
     bids_configs = update_bids_configuration(args.bids_settings)
 
+    # Config parsing
     qc_spec = validate_config(args.qc_specification_file, bids_configs)
-
     db_settings = db_settings_from_config(qc_spec, CONFIGURABLE_DB_SETTINGS)
+    config = Config.from_validated(qc_spec)
 
-    bids_files = get_qc_bidsfiles(args.base_directory, qc_spec)
+    bids_files = get_qc_bidsfiles(args.base_directory, config.globals)
 
     # Setup application configuration and DB
     app.config['niviz_rater.base_path'] = args.base_directory
@@ -194,7 +179,7 @@ def main():
     database_proxy.initialize(fetch_db_from_config(app.config))
     app.config['niviz_rater.db.instance'] = database_proxy
 
-    args.qc_spec = qc_spec
+    args.config = config
     args.bids_files = bids_files
     args.db_settings = db_settings
 

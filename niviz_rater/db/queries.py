@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from typing import Union, Tuple
+from typing import Union, Tuple, Optional
 import logging
-from peewee import IntegrityError
 import niviz_rater.db.models as models
 import niviz_rater.config.db_defaults as db_defaults
 
@@ -21,18 +20,14 @@ def get_component(component_name: str, create=False) -> models.Component:
     return component
 
 
-def add_annotation_to_component(
-        component: Union[str, models.Component],
-        annotation: str) -> Tuple[models.Component, models.Annotation]:
+def get_entity_by_row_col(row_name: str,
+                          col_name: str) -> Optional[models.Entity]:
+    """
+    Return an Entity by it's unique row/col combination
+    """
 
-    if isinstance(component, str):
-        try:
-            component = models.Component.get(
-                models.Component.name == component)
-        except IntegrityError:
-            logger.error(f"Component {component} does not exist")
-            logger.error("Create component before using")
-            raise
-
-    annotation = component.add_annotation(annotation)
-    return (component, annotation)
+    try:
+        return models.Entity.get((models.Entity.rowname == row_name)
+                                 & (models.Entity.columnname == col_name))
+    except models.Entity.DoesNotExist:
+        return None

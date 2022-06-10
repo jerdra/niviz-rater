@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from typing import Union, Tuple, Optional
+from typing import Optional
 import logging
 import niviz_rater.db.models as models
-import niviz_rater.config.db_defaults as db_defaults
 
 logger = logging.getLogger(__name__)
 

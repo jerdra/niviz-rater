@@ -1,7 +1,8 @@
 from peewee import SqliteDatabase
-from typing import Any, List, Optional, Dict
+from typing import Any, List, Optional
 import niviz_rater.db.models as models
 import niviz_rater.config.db_defaults as db_defaults
+from niviz_rater.spec import DBSettings
 
 
 def get_or_create_db(
@@ -30,8 +31,8 @@ def fetch_db_from_config(app_config,
                          additional_pragmas))
 
 
-def _create_ratings(db: SqliteDatabase, settings: Dict[str,
-                                                       Any]) -> SqliteDatabase:
+def _create_ratings(db: SqliteDatabase,
+                    settings: DBSettings) -> SqliteDatabase:
 
     if 'Ratings' not in settings:
         ratings = db_defaults.RATINGS
@@ -46,7 +47,7 @@ def _create_ratings(db: SqliteDatabase, settings: Dict[str,
 
 
 def initialize_tables(db: SqliteDatabase,
-                      settings: Dict[str, Any]) -> SqliteDatabase:
+                      settings: DBSettings) -> SqliteDatabase:
     """
     Initialize the Niviz database table with a given
     set of settings

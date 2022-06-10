@@ -19,6 +19,10 @@ class BaseModel(Model):
     class Meta:
         database = database_proxy
 
+    @property
+    def db(self):
+        return self._meta.database
+
 
 class Component(BaseModel):
     '''
@@ -34,7 +38,8 @@ class Component(BaseModel):
 
         annotation = Annotation(name=annotation_name, component=self)
         try:
-            annotation.save()
+            with self.db.atomic():
+                annotation.save()
         except IntegrityError:
             logger.error(f"Annotation {annotation_name} already exists for "
                          f"component {self.name}!")
@@ -76,7 +81,7 @@ class TableRow(BaseModel):
     name = CharField()
 
 
-class Entity(Model):
+class Entity(BaseModel):
     '''
     Single entity to QC
     '''
@@ -112,7 +117,8 @@ class Entity(Model):
         """
         image = Image(path=str(image_path), entity=self)
         try:
-            image.save()
+            with self.db.atomic():
+                image.save()
         except IntegrityError:
             logger.error(f"Image { image_path } is already being used for"
                          f" the Entity { self.name }")

@@ -15,7 +15,8 @@ from functools import partial
 from niviz_rater.api import apiRoutes
 from niviz_rater.db.utils import fetch_db_from_config, initialize_tables
 from niviz_rater.index import build_index
-from niviz_rater.utils import get_qc_bidsfiles, update_bids_configuration
+from niviz_rater.utils import (get_qc_bidsfiles, update_bids_configuration)
+from niviz_rater.spec import db_settings_from_config, process_config
 
 from niviz_rater.validation import validate_config
 
@@ -27,7 +28,7 @@ app = default_app()
 
 FILE = Path(__file__).parent
 DEFAULT_BIDS_CONFIGURATION = FILE / "data/bids.json"
-CONFIGURABLE_DB_SETTINGS = ['Rating']
+CONFIGURABLE_DB_SETTINGS = ['Ratings']
 
 
 def extract_db_settings_from_spec(
@@ -182,8 +183,7 @@ def main():
 
     qc_spec = validate_config(args.qc_specification_file, bids_configs)
 
-    qc_spec, db_settings = extract_db_settings_from_spec(
-        qc_spec, CONFIGURABLE_DB_SETTINGS)
+    db_settings = db_settings_from_config(qc_spec, CONFIGURABLE_DB_SETTINGS)
 
     bids_files = get_qc_bidsfiles(args.base_directory, qc_spec)
 

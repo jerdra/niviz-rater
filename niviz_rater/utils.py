@@ -2,13 +2,10 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import List, Iterable, TYPE_CHECKING
+from typing import Iterable
 
 import bids.config
 from bids.layout import BIDSLayout, add_config_paths
-
-if TYPE_CHECKING:
-    from niviz_rater.spec import ConfigGlobals
 
 
 def load_json(file):
@@ -28,13 +25,12 @@ def update_bids_configuration(bids_config: str) -> Iterable[str]:
     return bids.config.get_option('config_paths').values()
 
 
-def get_qc_bidsfiles(qc_dataset: str, config: ConfigGlobals) -> List[str]:
+def get_bids_layout(qc_dataset: str) -> BIDSLayout:
     """
-    Get BIDSFiles associated with qc_dataset
+    Get BIDSLayout associated with qc_dataset
     """
     layout = BIDSLayout(qc_dataset,
                         validate=False,
                         index_metadata=False,
                         config=["user"])
-    bidsfiles = layout.get(extension=config.image_extensions)
-    return bidsfiles
+    return layout

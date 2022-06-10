@@ -3,7 +3,7 @@ Niviz-Rater Spec representation module
 """
 
 from __future__ import annotations
-from typing import (List, NamedTuple, TYPE_CHECKING, Dict, Any, Optional)
+from typing import List, TYPE_CHECKING, Dict, Any, Iterable, Set
 
 from dataclasses import dataclass
 from string import Template
@@ -12,26 +12,34 @@ import logging
 
 if TYPE_CHECKING:
     from niviz_rater.validation import ValidConfig
+    from bids import BIDSLayout
 
 logger = logging.getLogger(__name__)
-
-
-class RowDescription(NamedTuple):
-    entities: List[str]
-    name: Template
-
-
 DBSettings = Dict[str, Any]
 
 
 @dataclass
 class SpecConfig:
+    """
+    Niviz specification configuration object
+    """
+
     globals: ConfigGlobals
     components: List[ConfigComponent]
 
     def from_validated(cls, config: ValidConfig) -> SpecConfig:
         return cls(globals=ConfigGlobals.from_config(config),
                    components=list(ConfigComponent.yield_from_config(config)))
+
+    def entities_by_component(
+            self, layout: BIDSLayout) -> Iterable[ComponentEntities]:
+        bidsfiles = layout.get(extension=self.globals.image_extensions)
+
+        for component in self.components:
+            yield ComponentEntities(
+                component.name,
+                component.build_qc_entities(bidsfiles,
+                                            self.globals.row_description))
 
 
 @dataclass
@@ -40,22 +48,16 @@ class ConfigGlobals:
     Global settings for Niviz-Rater specification file
     """
 
-    row_entities: List[str]
     image_extensions: List[str]
-    row_description: RowDescription
+    row_description: str
 
     def from_config(cls, config: ValidConfig) -> ConfigGlobals:
 
-        row_description = RowDescription(
-            entities=config['RowDescription']['entities'],
-            name=config['RowDescription']['name'])
-
-        return cls(row_entities=config['RowEntities'],
-                   image_extensions=config['ImageExtensions'],
-                   row_description=row_description)
+        return cls(image_extensions=config['ImageExtensions'],
+                   row_description=config['RowDescription'])
 
 
-@dataclass
+@dataclass(frozen=True)
 class QCEntity:
     """
     Helper class to represent a single QC entity
@@ -63,7 +65,8 @@ class QCEntity:
     images: list
     entities: dict
     tpl_label: str
-    tpl_column_name: str
+    tpl_column_name: Template
+    tpl_row_name: Template
 
     @property
     def name(self):
@@ -71,7 +74,35 @@ class QCEntity:
 
     @property
     def column_name(self):
-        return Template(self.tpl_column_name).substitute(self.entities)
+        return self.tpl_column_name.substitute(self.entities)
+
+    @property
+    def row_name(self):
+        return self.tpl_row_name.substitute(self.entities)
+
+
+@dataclass(frozen=True)
+class ComponentEntities:
+    """
+    Convenience class for providing information
+    on entities grouped by component
+    """
+    component_name: str
+    entities: QCEntity
+
+    @property
+    def rows(self) -> Set[str]:
+        """
+        Yield unique rows of QCEntities in instance
+        """
+        return set([e.row_name for e in self.entities])
+
+    @property
+    def columns(self) -> Set[str]:
+        """
+        Yield unique columns of QCEntities in instance
+        """
+        return set([e.column_name for e in self.entities])
 
 
 class ConfigComponent:
@@ -80,8 +111,8 @@ class ConfigComponent:
     from list of images
     """
 
-    def __init__(self, name, entities, label, column, images, annotations):
-        self.name = name
+    def __init__(self, id, entities, label, column, images, annotations):
+        self.id = id
         self.entities = entities
         self.label = label
         self.column = column
@@ -97,7 +128,8 @@ class ConfigComponent:
         for component in config['Components']:
             yield cls(**component)
 
-    def build_qc_entities(self, image_list):
+    def build_qc_entities(self, image_list,
+                          row_description: str) -> List[QCEntity]:
         """
         Build QC Entities given a list of images
 
@@ -126,7 +158,8 @@ class ConfigComponent:
                              for k in self.entities
                          },
                          tpl_label=self.label,
-                         tpl_column_name=self.column))
+                         tpl_column_name=Template(self.column),
+                         tpl_row_name=Template(row_description)))
 
         return qc_entities
 

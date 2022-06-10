@@ -36,10 +36,11 @@ class SpecConfig:
         bidsfiles = layout.get(extension=self.globals.image_extensions)
 
         for component in self.components:
-            yield ComponentEntities(component_name=component.name,
-                                    entities=component.build_qc_entities(
-                                        bidsfiles,
-                                        self.globals.row_description))
+            yield ComponentEntities(
+                component_name=component.name,
+                available_annotations=component.available_annotations,
+                entities=component.build_qc_entities(
+                    bidsfiles, self.globals.row_description))
 
 
 @dataclass
@@ -88,6 +89,7 @@ class ComponentEntities:
     on entities grouped by component
     """
     component_name: str
+    available_annotations: List[str]
     entities: QCEntity
 
     @property

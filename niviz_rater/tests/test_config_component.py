@@ -4,7 +4,7 @@ from itertools import product
 import bids
 import bids.layout.utils as bidsutils
 import bids.layout.writing as bidswriting
-import niviz_rater.index as index
+import niviz_rater.spec as spec
 
 # Force default path patterns to be what is used in data/bids.json
 # Used for constructing filename paths
@@ -34,7 +34,7 @@ def test_is_subdict_returns_true_when_given_subset():
 
     small = {"x": 123}
     big = {"x": 123, "y": 456}
-    assert index._is_subdict(big, small)
+    assert spec._is_subdict(big, small)
 
 
 @pytest.fixture
@@ -96,7 +96,7 @@ def test_group_by_entities(make_bidsfile):
     bidsfiles = make_bidsfile(**entities)
 
     # Convert to frozenset, key order doesn't matter
-    result = index._group_by_entities(bidsfiles, group_entities)
+    result = spec._group_by_entities(bidsfiles, group_entities)
     converted_result = {
         frozenset(k): set([b.path for b in v])
         for k, v in result
@@ -126,7 +126,7 @@ def test_raises_exception_with_more_than_one_match(make_bidsfile):
     image_description = {"subject": "A"}
 
     with pytest.raises(ValueError):
-        index.find_matches(bidsfiles, image_description)
+        spec.find_matches(bidsfiles, image_description)
 
 
 def test_config_component_raises_exception_with_zero_matches(make_bidsfile):
@@ -144,12 +144,12 @@ def test_config_component_raises_exception_with_zero_matches(make_bidsfile):
     image_description = {"subject": "C"}
 
     with pytest.raises(IndexError):
-        index.find_matches(bidsfiles, image_description)
+        spec.find_matches(bidsfiles, image_description)
 
 
 def test_qc_entities_returns_correct_column():
 
-    qc_entity = index.QCEntity(images=[
+    qc_entity = spec.QCEntity(images=[
         "sub-A/anat/sub-A_desc-x_T1w.nii.gz",
         "sub-A/anat/sub-A_desc-y_T1w.nii.gz",
     ],
@@ -187,18 +187,18 @@ def test_correct_qc_entities_are_built(make_bidsfile):
             "desc": "y"
         }]
     }
-    config_component = index.ConfigComponent(**component)
+    config_component = spec.ConfigComponent(**component)
     result = config_component.build_qc_entities(bidsfiles)
 
     expected_qc_entities = [
-        index.QCEntity(images=[
+        spec.QCEntity(images=[
             "sub-A/anat/sub-A_desc-x_T1w.nii.gz",
             "sub-A/anat/sub-A_desc-y_T1w.nii.gz",
         ],
                        entities={"subject": "A"},
                        tpl_label="${subject} TEST",
                        tpl_column_name="HELLO"),
-        index.QCEntity(images=[
+        spec.QCEntity(images=[
             "sub-B/anat/sub-B_desc-x_T1w.nii.gz",
             "sub-B/anat/sub-B_desc-y_T1w.nii.gz",
         ],

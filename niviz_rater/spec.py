@@ -164,7 +164,7 @@ def find_matches(images, image_descriptor):
 
 
 def db_settings_from_config(config: ValidConfig,
-                            keys: List[str]) -> Optional[DBSettings]:
+                            keys: List[str]) -> DBSettings:
     """
     Extract database settings from a valid configuration file
     """
@@ -173,8 +173,5 @@ def db_settings_from_config(config: ValidConfig,
     for k in keys:
         if k in config:
             db_settings[k] = config[k]
-
-    if not db_settings:
-        return None
 
     return db_settings

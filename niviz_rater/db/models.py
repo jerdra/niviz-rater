@@ -95,7 +95,7 @@ class Entity(BaseModel):
 
     class Meta:
         database = database_proxy
-        indexes = ((("name", ), True), )
+        indexes = ((("columnname", "rowname"), True), )
 
     @property
     def entry(self):

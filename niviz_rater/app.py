@@ -13,10 +13,9 @@ from threading import Thread
 from functools import partial
 
 from niviz_rater.api import apiRoutes
-from niviz_rater.db.utils import fetch_db_from_config, initialize_tables
+import niviz_rater.db.utils as dbutils
 import niviz_rater.db.exceptions as exceptions
-from niviz_rater.index import build_index
-from niviz_rater.utils import (get_qc_bidsfiles, update_bids_configuration)
+from niviz_rater.utils import get_bids_layout, update_bids_configuration
 from niviz_rater.spec import SpecConfig, db_settings_from_config
 
 from niviz_rater.validation import validate_config
@@ -89,13 +88,13 @@ def launch_fileserver(base_directory, port=5002, hostname='localhost'):
 
 @is_subcommand
 def initialize_db(db_settings: Dict[str, Any], config: SpecConfig,
-                  bids_files: Iterable[str]) -> None:
+                  bids_layout: Iterable[str]) -> None:
 
-    db = fetch_db_from_config(app.config)
+    db = dbutils.fetch_db_from_config(app.config)
 
     logging.info("Creating Database tables...")
     try:
-        initialize_tables(db, db_settings)
+        dbutils.initialize_tables(db, db_settings)
     except exceptions.IsInitialized:
         logger.error(f"DB { app.config['niviz_rater.db.file'] }"
                      " is already initialized!")
@@ -105,7 +104,8 @@ def initialize_db(db_settings: Dict[str, Any], config: SpecConfig,
         return
 
     logging.info("Building Index of QC images")
-    # build_index(db, bids_files, qc_spec)
+    for component_entity in config.entities_by_component(bids_layout):
+        dbutils.component_entities_to_db(db, component_entity)
 
 
 @is_subcommand
@@ -179,19 +179,18 @@ def main():
     db_settings = db_settings_from_config(qc_spec, CONFIGURABLE_DB_SETTINGS)
     config = SpecConfig.from_validated(qc_spec)
 
-    bids_files = get_qc_bidsfiles(args.base_directory, config.globals)
+    bids_layout = get_bids_layout(args.base_directory, config.globals)
 
     # Setup application configuration and DB
     app.config['niviz_rater.base_path'] = args.base_directory
     app.config['niviz_rater.db.file'] = args.db_file
 
-    database_proxy.initialize(fetch_db_from_config(app.config))
+    database_proxy.initialize(dbutils.fetch_db_from_config(app.config))
     app.config['niviz_rater.db.instance'] = database_proxy
 
     args.config = config
-    args.bids_files = bids_files
+    args.bids_layout = bids_layout
     args.db_settings = db_settings
-
     args.func(args)
 
 

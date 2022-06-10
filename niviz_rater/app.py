@@ -14,6 +14,7 @@ from functools import partial
 
 from niviz_rater.api import apiRoutes
 from niviz_rater.db.utils import fetch_db_from_config, initialize_tables
+import niviz_rater.db.exceptions as exceptions
 from niviz_rater.index import build_index
 from niviz_rater.utils import (get_qc_bidsfiles, update_bids_configuration)
 from niviz_rater.spec import SpecConfig, db_settings_from_config
@@ -93,7 +94,15 @@ def initialize_db(db_settings: Dict[str, Any], config: SpecConfig,
     db = fetch_db_from_config(app.config)
 
     logging.info("Creating Database tables...")
-    initialize_tables(db, db_settings)
+    try:
+        initialize_tables(db, db_settings)
+    except exceptions.IsInitialized:
+        logger.error(f"DB { app.config['niviz_rater.db.file'] }"
+                     " is already initialized!")
+        logger.error(
+            "Use `update_db` subcommand to add new qc images or annotations"
+            " to DB or use runserver to launch the QC web interface!")
+        return
 
     logging.info("Building Index of QC images")
     # build_index(db, bids_files, qc_spec)

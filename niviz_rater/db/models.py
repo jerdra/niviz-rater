@@ -189,3 +189,12 @@ class Image(BaseModel):
 
         # Unique constraint on path-entity tuples
         indexes = ((("path", "entity"), True), )
+
+
+DB_TABLES = [
+    Component, Annotation, Rating, TableColumn, TableRow, Entity, Image
+]
+DB_TABLE_NAMES = [
+    'component', 'annotation', 'rating', 'tablecolumn', 'tablerow', 'entity',
+    'image'
+]

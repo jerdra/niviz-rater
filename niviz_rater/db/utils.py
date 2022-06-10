@@ -1,8 +1,12 @@
+import logging
 from peewee import SqliteDatabase
 from typing import Any, List, Optional
 import niviz_rater.db.models as models
+import niviz_rater.db.exceptions as exceptions
 import niviz_rater.config.db_defaults as db_defaults
 from niviz_rater.spec import DBSettings
+
+logger = logging.getLogger(__name__)
 
 
 def get_or_create_db(
@@ -31,8 +35,7 @@ def fetch_db_from_config(app_config,
                          additional_pragmas))
 
 
-def _create_ratings(db: SqliteDatabase,
-                    settings: DBSettings) -> SqliteDatabase:
+def add_ratings(db: SqliteDatabase, settings: DBSettings) -> SqliteDatabase:
 
     if 'Ratings' not in settings:
         ratings = db_defaults.RATINGS
@@ -41,9 +44,13 @@ def _create_ratings(db: SqliteDatabase,
 
     with db.atomic():
         for rating in ratings:
-            models.Rating.create(name=rating)
+            models.Rating.get_or_create(models.Rating.name == rating)
 
     return db
+
+
+def is_initialized(db: SqliteDatabase):
+    return set(db.get_tables()) == set(models.DB_TABLE_NAMES)
 
 
 def initialize_tables(db: SqliteDatabase,
@@ -53,11 +60,11 @@ def initialize_tables(db: SqliteDatabase,
     set of settings
     """
 
-    db.create_tables([
-        models.Component, models.Annotation, models.Rating, models.TableColumn,
-        models.TableRow, models.Entity, models.Image
-    ])
+    # Check if tables already initialized
+    if is_initialized(db):
+        raise exceptions.IsInitialized
 
-    db = _create_ratings(db, settings)
+    db.create_tables(models.DB_TABLES)
+    db = add_ratings(db, settings)
 
     return db

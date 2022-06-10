@@ -1,9 +1,8 @@
+from __future__ import annotations
+
 import json
 import logging
-import os
-import configparser
-import importlib.resources as pkg_resources
-from typing import List, Iterable, Any, Dict
+from typing import List, Iterable
 
 import bids.config
 from bids.layout import BIDSLayout, add_config_paths

@@ -44,7 +44,7 @@ def add_ratings(db: SqliteDatabase, settings: DBSettings) -> SqliteDatabase:
 
     with db.atomic():
         for rating in ratings:
-            models.Rating.get_or_create(models.Rating.name == rating)
+            models.Rating.get_or_create(name=rating)
 
     return db
 

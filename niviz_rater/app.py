@@ -16,7 +16,7 @@ from niviz_rater.api import apiRoutes
 from niviz_rater.db.utils import fetch_db_from_config, initialize_tables
 from niviz_rater.index import build_index
 from niviz_rater.utils import (get_qc_bidsfiles, update_bids_configuration)
-from niviz_rater.spec import Config, db_settings_from_config
+from niviz_rater.spec import SpecConfig, db_settings_from_config
 
 from niviz_rater.validation import validate_config
 
@@ -87,7 +87,7 @@ def launch_fileserver(base_directory, port=5002, hostname='localhost'):
 
 
 @is_subcommand
-def initialize_db(db_settings: Dict[str, Any], config: Config,
+def initialize_db(db_settings: Dict[str, Any], config: SpecConfig,
                   bids_files: Iterable[str]) -> None:
 
     db = fetch_db_from_config(app.config)
@@ -168,7 +168,7 @@ def main():
     # Config parsing
     qc_spec = validate_config(args.qc_specification_file, bids_configs)
     db_settings = db_settings_from_config(qc_spec, CONFIGURABLE_DB_SETTINGS)
-    config = Config.from_validated(qc_spec)
+    config = SpecConfig.from_validated(qc_spec)
 
     bids_files = get_qc_bidsfiles(args.base_directory, config.globals)
 

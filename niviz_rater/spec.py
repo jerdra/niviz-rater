@@ -25,11 +25,11 @@ DBSettings = Dict[str, Any]
 
 
 @dataclass
-class Config:
+class SpecConfig:
     globals: ConfigGlobals
     components: List[ConfigComponent]
 
-    def from_validated(cls, config: ValidConfig) -> Config:
+    def from_validated(cls, config: ValidConfig) -> SpecConfig:
         return cls(globals=ConfigGlobals.from_config(config),
                    components=list(ConfigComponent.yield_from_config(config)))
 

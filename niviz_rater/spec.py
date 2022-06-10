@@ -2,12 +2,44 @@
 Niviz-Rater Spec representation module
 """
 
+from __future__ import annotations
+from typing import List, NamedTuple, TYPE_CHECKING
+
 from dataclasses import dataclass
 from string import Template
 from itertools import groupby
 import logging
 
+if TYPE_CHECKING:
+    from niviz_rater.validation import ValidConfig
+
 logger = logging.getLogger(__name__)
+
+
+class RowDescription(NamedTuple):
+    entities: List[str]
+    name: Template
+
+
+@dataclass
+class ConfigGlobals:
+    """
+    Global settings for Niviz-Rater specification file
+    """
+
+    row_entities: List[str]
+    image_extensions: List[str]
+    row_description: RowDescription
+
+    def from_config(cls, config: ValidConfig) -> ConfigGlobals:
+
+        row_description = RowDescription(
+            entities=config['RowDescription']['entities'],
+            name=config['RowDescription']['name'])
+
+        return cls(row_entities=config['RowEntities'],
+                   image_extensions=config['ImageExtensions'],
+                   row_description=row_description)
 
 
 @dataclass
@@ -42,6 +74,15 @@ class ConfigComponent:
         self.column = column
         self.image_descriptors = images
         self.available_annotations = annotations
+
+    @classmethod
+    def yield_from_config(cls, config: ValidConfig) -> ConfigComponent:
+        """
+        Create ConfigComponent instances from a validated configuration
+        for niviz-rater
+        """
+        for component in config['Components']:
+            yield cls(**component)
 
     def build_qc_entities(self, image_list):
         """

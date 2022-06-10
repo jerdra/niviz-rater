@@ -36,10 +36,10 @@ class SpecConfig:
         bidsfiles = layout.get(extension=self.globals.image_extensions)
 
         for component in self.components:
-            yield ComponentEntities(
-                component.name,
-                component.build_qc_entities(bidsfiles,
-                                            self.globals.row_description))
+            yield ComponentEntities(component_name=component.name,
+                                    entities=component.build_qc_entities(
+                                        bidsfiles,
+                                        self.globals.row_description))
 
 
 @dataclass

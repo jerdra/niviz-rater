@@ -1,0 +1,2 @@
+class IsInitialized(Exception):
+    pass

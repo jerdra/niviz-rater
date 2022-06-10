@@ -1,14 +1,13 @@
 ImageExtensions: list(str(ignore_case = True), min = 1)
 
-RowDescription:
-  entities: list(include('entity'), min = 1)
-  name: str(min = 1)
+RowDescription: str(min=1)
 
 Components: list(include('Component'), min = 1)
 Ratings: list(include('qcoption'), required=False, none=False)
 
 ---
 Component:
+  id: str(min = 1)
   entities: list(include('entity'), min = 1)
   name: str(min = 1)
   column: str(min = 1)

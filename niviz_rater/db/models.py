@@ -4,10 +4,13 @@ Niviz Data Models
 
 from __future__ import annotations
 from pathlib import Path
-from typing import Union, List
+from typing import Union, List, TYPE_CHECKING
 import logging
 from peewee import (Model, ForeignKeyField, TextField, CharField,
                     DatabaseProxy, IntegrityError)
+
+if TYPE_CHECKING:
+    from niviz_rater.spec import QCEntity
 
 logger = logging.getLogger(__name__)
 
@@ -96,6 +99,21 @@ class Entity(BaseModel):
     class Meta:
         database = database_proxy
         indexes = ((("columnname", "rowname"), True), )
+
+    @classmethod
+    def from_qc_entity(cls, qc_entity: QCEntity,
+                       component: Component) -> Entity:
+        """
+        Create an Entity model from a QCEntity description
+        of an object
+        """
+        with cls.db.atomic():
+            entity = cls(name=qc_entity.name,
+                         component=component,
+                         rowname=qc_entity.row_name,
+                         columnname=qc_entity.column_name)
+            entity.set_images(qc_entity.images)
+        return entity
 
     def __repr__(self):
         return (f"Name:  {self.name}\n"

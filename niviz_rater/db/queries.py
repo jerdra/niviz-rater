@@ -25,8 +25,5 @@ def get_entity_by_row_col(row_name: str,
     Return an Entity by it's unique row/col combination
     """
 
-    try:
-        return models.Entity.get((models.Entity.rowname == row_name)
-                                 & (models.Entity.columnname == col_name))
-    except models.Entity.DoesNotExist:
-        return None
+    return models.Entity.get_or_none((models.Entity.rowname == row_name)
+                                     & (models.Entity.columnname == col_name))

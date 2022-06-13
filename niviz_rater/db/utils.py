@@ -109,22 +109,31 @@ def component_entities_to_db(db: SqliteDatabase,
                                                      entity.column_name)
 
         if entity_model is None:
+            logger.info("Creating new entity\n"
+                        f"Row: {entity.rowname}\n"
+                        f"Column: {entity.column_name}")
             entity_model = models.Entity(name=entity.name,
                                          component=component,
                                          rowname=entity.rowname,
                                          columnname=entity.columnname)
 
         elif update_existing:
+            logger.info("Updating existing Entity\n"
+                        f"Row: {entity.rowname}\n"
+                        f"Column: {entity.column_name}\n")
 
             # We delete images to respect new order
             # TODO: Have order be explicitly represented in DB
             images = entity_model.images
+            logger.info("Setting QC images for Entity...")
             with db.atomic():
                 [image.delete() for image in images]
 
             entity_model.name = entity.name
 
             if reset_state:
+                logger.info("`reset_state` set!\n"
+                            "Undoing QC for Entity")
                 entity_model.annotation = None
                 entity_model.rating = None
 
@@ -134,3 +143,5 @@ def component_entities_to_db(db: SqliteDatabase,
 
         for image in entity.images:
             entity_model.add_image(image)
+
+        logger.info("Successfully committed Entity to DB")

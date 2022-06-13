@@ -10,6 +10,7 @@ from niviz_rater.spec import DBSettings
 
 if TYPE_CHECKING:
     from niviz_rater.spec import ComponentEntities
+    from niviz_rater.spec import QCEntity
 
 logger = logging.getLogger(__name__)
 
@@ -75,6 +76,37 @@ def initialize_tables(db: SqliteDatabase,
     return db
 
 
+def create_or_update_entity(db: SqliteDatabase,
+                            qc_entity: QCEntity,
+                            component: models.Component,
+                            update_existing: bool = False,
+                            reset_on_update: bool = True):
+    """
+    Create or update an existing Entity
+    """
+    entity = queries.get_entity_by_row_col(qc_entity.row_name,
+                                           qc_entity.column_name)
+
+    if entity is None:
+        logger.info(f"Creating new Entity\n {entity}")
+        entity = models.Entity.from_qc_entity(entity, component)
+
+    elif update_existing:
+        logger.info(f"Updating existing Entity\n {entity}")
+        entity.set_images(qc_entity.images)
+
+        with db.atomic():
+            entity.name = qc_entity.name
+            if reset_on_update:
+                logger.info("`reset_on_update` set!\n"
+                            "Undoing QC for Entity")
+                entity.remove_qc()
+
+    else:
+        logger.info("Skipping update to Entity\n {entity}")
+        return
+
+
 def component_entities_to_db(db: SqliteDatabase,
                              component_entities: ComponentEntities,
                              update_existing: bool = False,
@@ -105,32 +137,11 @@ def component_entities_to_db(db: SqliteDatabase,
             models.TableColumn.get_or_create(name=column)
 
     for entity in component_entities.entities:
-
-        entity_model = queries.get_entity_by_row_col(entity.rowname,
-                                                     entity.column_name)
-
-        if entity_model is None:
-            logger.info(f"Creating new Entity\n {entity_model}")
-            entity_model = models.Entity(name=entity.name,
-                                         component=component,
-                                         rowname=entity.rowname,
-                                         columnname=entity.columnname)
-            entity_model.save()
-            entity_model.set_images(entity.images)
-
-        elif update_existing:
-            logger.info(f"Updating existing Entity\n {entity_model}")
-
-            entity_model.set_images(entity.images)
-            entity_model.name = entity.name
-
-            if reset_on_update:
-                logger.info("`reset_on_update` set!\n"
-                            "Undoing QC for Entity")
-                entity_model.remove_qc()
-        else:
-            logger.info("Skipping update to Entity\n {entity_model}")
-            return
+        create_or_update_entity(db,
+                                entity,
+                                component,
+                                update_existing=update_existing,
+                                reset_on_update=reset_on_update)
 
         logger.info("Successfully committed Entity to DB")
         return

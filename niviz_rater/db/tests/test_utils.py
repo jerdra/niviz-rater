@@ -20,3 +20,19 @@ def test_ratings_are_initialized_with_settings(db):
 
     found_ratings = [r.name for r in models.Rating]
     assert set(expected_ratings) == set(found_ratings)
+
+
+def test_create_or_update_entity_skips_update_if_flag_not_set(db):
+    assert False
+
+
+def test_create_or_update_entity_update_if_update_existing(db):
+    assert False
+
+
+def test_create_or_update_entity_update_and_reset_if_both_flags(db):
+    assert False
+
+
+def test_create_or_update_entity_update_does_nothing_if_existing_no_flags(db):
+    assert False

@@ -211,10 +211,12 @@ class Entity(BaseModel):
         """
 
         with self.db.atomic():
-            [image.delete() for image in self.images]
+            [image.delete_instance() for image in self.images]
 
         with self.db.atomic():
             [self.add_image(image) for image in images]
+
+        self.save()
 
     def remove_qc(self):
         """

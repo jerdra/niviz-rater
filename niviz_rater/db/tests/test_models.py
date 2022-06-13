@@ -339,3 +339,41 @@ def test_entity_update_rating_does_nothing_if_rating_invalid(db):
         entity.update_rating("FAKE")
 
     assert entity.rating == rating
+
+
+def test_set_images_fully_replaces_images(db):
+    annotation_name = "12345"
+    rating_name = "A"
+    comment = "A COMMENT"
+    settings = {"Ratings": ["A", "B", "C", "D"]}
+
+    db = dbutils.initialize_tables(db, settings)
+
+    # Set up required Foreign Keys
+    tr = models.TableRow(name="row")
+    tc = models.TableColumn(name="column")
+    component = models.Component(name="abc")
+    with db.atomic():
+        tr.save()
+        tc.save()
+        component.save()
+        annotation = component.add_annotation(annotation_name)
+    rating = models.Rating.get(models.Rating.name == rating_name)
+
+    # Create Entity
+    entity = models.Entity.create(name="111",
+                                  columnname=tc,
+                                  rowname=tr,
+                                  component=component,
+                                  comment=comment,
+                                  rating=rating,
+                                  annotation=annotation)
+
+    old_images = [Path(i) for i in ["/a/", "/b/", "/c/"]]
+    [entity.add_image(i) for i in old_images]
+
+    new_images = [Path(i) for i in ["/e/", "/k/", "/a/"]]
+    entity.set_images(new_images)
+
+    for img, expect_img in zip(entity.images, new_images):
+        assert Path(img.path) == expect_img

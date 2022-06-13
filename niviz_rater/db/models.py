@@ -4,7 +4,7 @@ Niviz Data Models
 
 from __future__ import annotations
 from pathlib import Path
-from typing import Union
+from typing import Union, List
 import logging
 from peewee import (Model, ForeignKeyField, TextField, CharField,
                     DatabaseProxy, IntegrityError)
@@ -97,6 +97,11 @@ class Entity(BaseModel):
         database = database_proxy
         indexes = ((("columnname", "rowname"), True), )
 
+    def __repr__(self):
+        return (f"Name:  {self.name}\n"
+                f"Row: {self.row}\n"
+                f"Column: {self.columnname}")
+
     @property
     def entry(self):
         if self.annotation:
@@ -181,6 +186,25 @@ class Entity(BaseModel):
         Update the Entity's comment
         """
         self.comment = comment.strip('\n').strip(' ')
+
+    def set_images(self, images: List[Path]):
+        """
+        Set images associated with Entity to `images`
+        """
+
+        with self.db.atomic():
+            [image.delete() for image in self.images]
+
+        with self.db.atomic():
+            [self.add_image(image) for image in images]
+
+    def remove_qc(self):
+        """
+        Remove QC ratings on Entity
+        """
+        with self.db.atomic():
+            self.annotation = None
+            self.rating = None
 
 
 class Image(BaseModel):

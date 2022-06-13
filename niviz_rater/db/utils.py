@@ -78,12 +78,13 @@ def initialize_tables(db: SqliteDatabase,
 def component_entities_to_db(db: SqliteDatabase,
                              component_entities: ComponentEntities,
                              update_existing: bool = False,
-                             reset_state: bool = False):
+                             reset_on_update: bool = True):
     """
     Add component with entities to DB, skip adding existing components
 
     Options:
         update_existing: Causes already existing entities to be updated
+        reset_on_update: Undo an existing entity's QC rating
     """
 
     # Create component
@@ -109,39 +110,27 @@ def component_entities_to_db(db: SqliteDatabase,
                                                      entity.column_name)
 
         if entity_model is None:
-            logger.info("Creating new entity\n"
-                        f"Row: {entity.rowname}\n"
-                        f"Column: {entity.column_name}")
+            logger.info(f"Creating new Entity\n {entity_model}")
             entity_model = models.Entity(name=entity.name,
                                          component=component,
                                          rowname=entity.rowname,
                                          columnname=entity.columnname)
+            entity_model.save()
+            entity_model.set_images(entity.images)
 
         elif update_existing:
-            logger.info("Updating existing Entity\n"
-                        f"Row: {entity.rowname}\n"
-                        f"Column: {entity.column_name}\n")
+            logger.info(f"Updating existing Entity\n {entity_model}")
 
-            # We delete images to respect new order
-            # TODO: Have order be explicitly represented in DB
-            images = entity_model.images
-            logger.info("Setting QC images for Entity...")
-            with db.atomic():
-                [image.delete() for image in images]
-
+            entity_model.set_images(entity.images)
             entity_model.name = entity.name
 
-            if reset_state:
-                logger.info("`reset_state` set!\n"
+            if reset_on_update:
+                logger.info("`reset_on_update` set!\n"
                             "Undoing QC for Entity")
-                entity_model.annotation = None
-                entity_model.rating = None
-
-        # Save updates/creation
-        with db.atomic():
-            entity_model.save()
-
-        for image in entity.images:
-            entity_model.add_image(image)
+                entity_model.remove_qc()
+        else:
+            logger.info("Skipping update to Entity\n {entity_model}")
+            return
 
         logger.info("Successfully committed Entity to DB")
+        return

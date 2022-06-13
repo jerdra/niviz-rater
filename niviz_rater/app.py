@@ -105,6 +105,11 @@ def initialize_db(db_settings: Dict[str, Any], config: SpecConfig,
 
     logging.info("Building Index of QC images")
     for component_entity in config.entities_by_component(bids_layout):
+
+        logger.info(
+            f"Adding {component_entity.component_name} to DB\n"
+            f"Attempting to add {len(component_entity.entities)} records")
+
         dbutils.component_entities_to_db(db, component_entity)
 
 

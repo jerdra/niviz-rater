@@ -41,68 +41,25 @@ def test_component_add_annotation_does_not_create_when_already_exists(db):
     assert annot1 == annot2
 
 
-def test_entity_entry_formatted_correctly(db):
+def test_entity_entry_formatted_correctly(configured_db):
 
-    annotation_name = "12345"
-    rating_name = "A"
-    comment = "A COMMENT"
-    settings = {"Ratings": ["A", "B", "C", "D"]}
+    db, settings = configured_db
 
-    db = dbutils.initialize_tables(db, settings)
+    annotation_name = settings['annotation_name']
+    rating_name = settings['rating_name']
+    comment = settings['comment']
 
-    # Set up required Foreign Keys
-    tr = models.TableRow(name="row")
-    tc = models.TableColumn(name="column")
-    component = models.Component(name="abc")
-    with db.atomic():
-        tr.save()
-        tc.save()
-        component.save()
-        annotation = component.add_annotation(annotation_name)
-    rating = models.Rating.get(models.Rating.name == rating_name)
-
-    # Create Entity
-    entity = models.Entity.create(name="111",
-                                  columnname=tc,
-                                  rowname=tr,
-                                  component=component,
-                                  comment=comment,
-                                  rating=rating,
-                                  annotation=annotation)
+    entity = models.Entity.get_by_id(1)
 
     expected_entry = (annotation_name, rating_name, comment)
     assert entity.entry == expected_entry
 
 
-def test_entity_add_image_updates_db(db):
+def test_entity_add_image_updates_db(configured_db):
 
-    annotation_name = "12345"
-    rating_name = "A"
-    comment = "A COMMENT"
-    settings = {"Ratings": ["A", "B", "C", "D"]}
+    db, settings = configured_db
 
-    db = dbutils.initialize_tables(db, settings)
-
-    # Set up required Foreign Keys
-    tr = models.TableRow(name="row")
-    tc = models.TableColumn(name="column")
-    component = models.Component(name="abc")
-    with db.atomic():
-        tr.save()
-        tc.save()
-        component.save()
-        annotation = component.add_annotation(annotation_name)
-    rating = models.Rating.get(models.Rating.name == rating_name)
-
-    # Create Entity
-    entity = models.Entity.create(name="111",
-                                  columnname=tc,
-                                  rowname=tr,
-                                  component=component,
-                                  comment=comment,
-                                  rating=rating,
-                                  annotation=annotation)
-
+    entity = models.Entity.get_by_id(1)
     image_path = Path("/this/is/a/path")
     with db.atomic():
         entity.add_image(image_path)
@@ -114,35 +71,11 @@ def test_entity_add_image_updates_db(db):
     assert img.entity == entity
 
 
-def test_adding_same_image_to_entity_returns_same_image(db):
+def test_adding_same_image_to_entity_returns_same_image(configured_db):
 
-    annotation_name = "12345"
-    rating_name = "A"
-    comment = "A COMMENT"
-    settings = {"Ratings": ["A", "B", "C", "D"]}
+    db, settings = configured_db
 
-    db = dbutils.initialize_tables(db, settings)
-
-    # Set up required Foreign Keys
-    tr = models.TableRow(name="row")
-    tc = models.TableColumn(name="column")
-    component = models.Component(name="abc")
-    with db.atomic():
-        tr.save()
-        tc.save()
-        component.save()
-        annotation = component.add_annotation(annotation_name)
-    rating = models.Rating.get(models.Rating.name == rating_name)
-
-    # Create Entity
-    entity = models.Entity.create(name="111",
-                                  columnname=tc,
-                                  rowname=tr,
-                                  component=component,
-                                  comment=comment,
-                                  rating=rating,
-                                  annotation=annotation)
-
+    entity = models.Entity.get_by_id(1)
     image_path = Path("/this/is/a/path")
     with db.atomic():
         image1 = entity.add_image(image_path)
@@ -151,36 +84,13 @@ def test_adding_same_image_to_entity_returns_same_image(db):
     assert image1 == image2
 
 
-def test_entity_update_annotation_sets_correctly_if_configured(db):
+def test_entity_update_annotation_sets_correctly_if_configured(configured_db):
 
-    annotation_name = "12345"
-    rating_name = "A"
-    comment = "A COMMENT"
-    settings = {"Ratings": ["A", "B", "C", "D"]}
+    db, settings = configured_db
 
-    db = dbutils.initialize_tables(db, settings)
+    entity = models.Entity.get_by_id(1)
+    component = models.Component.get_by_id(1)
 
-    # Set up required Foreign Keys
-    tr = models.TableRow(name="row")
-    tc = models.TableColumn(name="column")
-    component = models.Component(name="abc")
-    with db.atomic():
-        tr.save()
-        tc.save()
-        component.save()
-        annotation = component.add_annotation(annotation_name)
-    rating = models.Rating.get(models.Rating.name == rating_name)
-
-    # Create Entity
-    entity = models.Entity.create(name="111",
-                                  columnname=tc,
-                                  rowname=tr,
-                                  component=component,
-                                  comment=comment,
-                                  rating=rating,
-                                  annotation=annotation)
-
-    # Add new annotation
     new_annotation_name = "new annotation"
     with db.atomic():
         # Add annotation, store model instance
@@ -193,34 +103,10 @@ def test_entity_update_annotation_sets_correctly_if_configured(db):
     assert entity.annotation == new_annotation
 
 
-def test_entity_update_annotation_creates_if_flag_set(db):
+def test_entity_update_annotation_creates_if_flag_set(configured_db):
 
-    annotation_name = "12345"
-    rating_name = "A"
-    comment = "A COMMENT"
-    settings = {"Ratings": ["A", "B", "C", "D"]}
-
-    db = dbutils.initialize_tables(db, settings)
-
-    # Set up required Foreign Keys
-    tr = models.TableRow(name="row")
-    tc = models.TableColumn(name="column")
-    component = models.Component(name="abc")
-    with db.atomic():
-        tr.save()
-        tc.save()
-        component.save()
-        annotation = component.add_annotation(annotation_name)
-    rating = models.Rating.get(models.Rating.name == rating_name)
-
-    # Create Entity
-    entity = models.Entity.create(name="111",
-                                  columnname=tc,
-                                  rowname=tr,
-                                  component=component,
-                                  comment=comment,
-                                  rating=rating,
-                                  annotation=annotation)
+    db, settings = configured_db
+    entity = models.Entity.get_by_id(1)
 
     # Add new annotation
     new_annotation_name = "new annotation"
@@ -232,34 +118,10 @@ def test_entity_update_annotation_creates_if_flag_set(db):
     assert entity.annotation.name == new_annotation_name
 
 
-def test_entity_update_annotation_does_nothing_if_flag_not_set(db):
+def test_entity_update_annotation_does_nothing_if_flag_not_set(configured_db):
 
-    annotation_name = "12345"
-    rating_name = "A"
-    comment = "A COMMENT"
-    settings = {"Ratings": ["A", "B", "C", "D"]}
-
-    db = dbutils.initialize_tables(db, settings)
-
-    # Set up required Foreign Keys
-    tr = models.TableRow(name="row")
-    tc = models.TableColumn(name="column")
-    component = models.Component(name="abc")
-    with db.atomic():
-        tr.save()
-        tc.save()
-        component.save()
-        annotation = component.add_annotation(annotation_name)
-    rating = models.Rating.get(models.Rating.name == rating_name)
-
-    # Create Entity
-    entity = models.Entity.create(name="111",
-                                  columnname=tc,
-                                  rowname=tr,
-                                  component=component,
-                                  comment=comment,
-                                  rating=rating,
-                                  annotation=annotation)
+    db, settings = configured_db
+    entity = models.Entity.get_by_id(1)
 
     # Add new annotation
     new_annotation_name = "new annotation"
@@ -268,36 +130,17 @@ def test_entity_update_annotation_does_nothing_if_flag_not_set(db):
         # Update annotation using just name, this should do nothing
         entity.update_annotation(new_annotation_name, create=False)
 
+    annotation = models.Annotation.get(
+        models.Annotation.name == settings['annotation_name'])
     assert entity.annotation == annotation
 
 
-def test_entity_update_rating_sets_if_rating_exists(db):
-    annotation_name = "12345"
-    rating_name = "A"
-    comment = "A COMMENT"
-    settings = {"Ratings": ["A", "B", "C", "D"]}
+def test_entity_update_rating_sets_if_rating_exists(configured_db):
 
-    db = dbutils.initialize_tables(db, settings)
+    db, settings = configured_db
 
-    # Set up required Foreign Keys
-    tr = models.TableRow(name="row")
-    tc = models.TableColumn(name="column")
-    component = models.Component(name="abc")
-    with db.atomic():
-        tr.save()
-        tc.save()
-        component.save()
-        annotation = component.add_annotation(annotation_name)
-    rating = models.Rating.get(models.Rating.name == rating_name)
+    entity = models.Entity.get_by_id(1)
 
-    # Create Entity
-    entity = models.Entity.create(name="111",
-                                  columnname=tc,
-                                  rowname=tr,
-                                  component=component,
-                                  comment=comment,
-                                  rating=rating,
-                                  annotation=annotation)
     # Get rating
     new_rating = models.Rating.get(models.Rating.name == "B")
 
@@ -307,33 +150,12 @@ def test_entity_update_rating_sets_if_rating_exists(db):
     assert entity.rating == new_rating
 
 
-def test_entity_update_rating_does_nothing_if_rating_invalid(db):
-    annotation_name = "12345"
-    rating_name = "A"
-    comment = "A COMMENT"
-    settings = {"Ratings": ["A", "B", "C", "D"]}
+def test_entity_update_rating_does_nothing_if_rating_invalid(configured_db):
 
-    db = dbutils.initialize_tables(db, settings)
+    db, settings = configured_db
+    entity = models.Entity.get_by_id(1)
+    rating = models.Rating.get(models.Rating.name == settings['rating_name'])
 
-    # Set up required Foreign Keys
-    tr = models.TableRow(name="row")
-    tc = models.TableColumn(name="column")
-    component = models.Component(name="abc")
-    with db.atomic():
-        tr.save()
-        tc.save()
-        component.save()
-        annotation = component.add_annotation(annotation_name)
-    rating = models.Rating.get(models.Rating.name == rating_name)
-
-    # Create Entity
-    entity = models.Entity.create(name="111",
-                                  columnname=tc,
-                                  rowname=tr,
-                                  component=component,
-                                  comment=comment,
-                                  rating=rating,
-                                  annotation=annotation)
     # Get rating
     with db.atomic():
         entity.update_rating("FAKE")
@@ -341,33 +163,10 @@ def test_entity_update_rating_does_nothing_if_rating_invalid(db):
     assert entity.rating == rating
 
 
-def test_set_images_fully_replaces_images(db):
-    annotation_name = "12345"
-    rating_name = "A"
-    comment = "A COMMENT"
-    settings = {"Ratings": ["A", "B", "C", "D"]}
+def test_set_images_fully_replaces_images(configured_db):
 
-    db = dbutils.initialize_tables(db, settings)
-
-    # Set up required Foreign Keys
-    tr = models.TableRow(name="row")
-    tc = models.TableColumn(name="column")
-    component = models.Component(name="abc")
-    with db.atomic():
-        tr.save()
-        tc.save()
-        component.save()
-        annotation = component.add_annotation(annotation_name)
-    rating = models.Rating.get(models.Rating.name == rating_name)
-
-    # Create Entity
-    entity = models.Entity.create(name="111",
-                                  columnname=tc,
-                                  rowname=tr,
-                                  component=component,
-                                  comment=comment,
-                                  rating=rating,
-                                  annotation=annotation)
+    db, settings = configured_db
+    entity = models.Entity.get_by_id(1)
 
     old_images = [Path(i) for i in ["/a/", "/b/", "/c/"]]
     [entity.add_image(i) for i in old_images]

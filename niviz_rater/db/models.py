@@ -91,10 +91,10 @@ class Entity(BaseModel):
     name = CharField()
     columnname = ForeignKeyField(TableColumn, null=False, backref='entities')
     rowname = ForeignKeyField(TableRow, null=False, backref='entities')
-    component = ForeignKeyField(Component, null=False, backref='+')
+    component = ForeignKeyField(Component, null=False, backref='entities')
     comment = TextField(default="")
-    rating = ForeignKeyField(Rating, backref='+')
-    annotation = ForeignKeyField(Annotation, backref='+')
+    rating = ForeignKeyField(Rating)
+    annotation = ForeignKeyField(Annotation)
 
     class Meta:
         database = database_proxy
@@ -107,6 +107,7 @@ class Entity(BaseModel):
         Create an Entity model from a QCEntity description
         of an object
         """
+
         with cls.db.atomic():
             entity = cls(name=qc_entity.name,
                          component=component,
@@ -117,7 +118,7 @@ class Entity(BaseModel):
 
     def __repr__(self):
         return (f"Name:  {self.name}\n"
-                f"Row: {self.row}\n"
+                f"Row: {self.rowname}\n"
                 f"Column: {self.columnname}")
 
     @property

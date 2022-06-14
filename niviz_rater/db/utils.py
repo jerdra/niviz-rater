@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, List, Optional, TYPE_CHECKING
+from typing import Any, List, Optional, Dict, TYPE_CHECKING
 import logging
 from peewee import SqliteDatabase
 import niviz_rater.db.models as models
@@ -17,11 +17,11 @@ logger = logging.getLogger(__name__)
 
 def get_or_create_db(
         db_str: str,
-        additional_pragmas: Optional[List[Any]] = None) -> SqliteDatabase:
+        additional_pragmas: Dict[str, Any] = None) -> SqliteDatabase:
 
-    pragmas = [('foreign_keys', 'on')]
+    pragmas = {'foreign_keys': 1}
     if additional_pragmas:
-        pragmas.append(additional_pragmas)
+        pragmas.update(additional_pragmas)
 
     sqlite_db = SqliteDatabase(db_str, pragmas=pragmas, uri=True)
     return sqlite_db

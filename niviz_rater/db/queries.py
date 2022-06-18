@@ -4,6 +4,7 @@ from typing import Optional
 import logging
 import niviz_rater.db.models as models
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -25,5 +26,17 @@ def get_entity_by_row_col(row_name: str,
     Return an Entity by it's unique row/col combination
     """
 
-    return models.Entity.get_or_none((models.Entity.rowname == row_name)
-                                     & (models.Entity.columnname == col_name))
+    result = models.Entity.select(models.Entity, models.TableColumn,
+                                  models.TableRow) \
+        .join(models.TableRow) \
+        .switch(models.Entity) \
+        .join(models.TableColumn) \
+        .switch(models.Entity) \
+        .where((models.TableColumn.name == col_name) &
+               (models.TableRow.name == row_name))
+
+    if len(result) > 1:
+        logger.error(f"Expected 1 result but got {len(result)}\n"
+                     "Only returning first result")
+
+    return result.first()

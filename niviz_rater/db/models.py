@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Union, List, TYPE_CHECKING
 import logging
 from peewee import (Model, ForeignKeyField, TextField, CharField,
-                    DatabaseProxy, IntegrityError)
+                    DatabaseProxy, IntegrityError, SqliteDatabase)
 
 if TYPE_CHECKING:
     from niviz_rater.spec import QCEntity
@@ -93,26 +93,26 @@ class Entity(BaseModel):
     rowname = ForeignKeyField(TableRow, null=False, backref='entities')
     component = ForeignKeyField(Component, null=False, backref='entities')
     comment = TextField(default="")
-    rating = ForeignKeyField(Rating)
-    annotation = ForeignKeyField(Annotation)
+    rating = ForeignKeyField(Rating, null=True)
+    annotation = ForeignKeyField(Annotation, null=True)
 
     class Meta:
         database = database_proxy
         indexes = ((("columnname", "rowname"), True), )
 
     @classmethod
-    def from_qc_entity(cls, qc_entity: QCEntity,
+    def from_qc_entity(cls, db: SqliteDatabase, qc_entity: QCEntity,
                        component: Component) -> Entity:
         """
         Create an Entity model from a QCEntity description
         of an object
         """
 
-        with cls.db.atomic():
-            entity = cls(name=qc_entity.name,
-                         component=component,
-                         rowname=qc_entity.row_name,
-                         columnname=qc_entity.column_name)
+        with db.atomic():
+            entity = cls.create(name=qc_entity.name,
+                                component=component,
+                                rowname=qc_entity.row_name,
+                                columnname=qc_entity.column_name)
             entity.set_images(qc_entity.images)
         return entity
 

@@ -25,12 +25,10 @@ def test_create_or_update_entity_skips_update_if_flag_not_set(configured_db):
     db, settings = configured_db
     new_name = "NEW_NAME"
 
-    tablerow = models.TableRow.get_by_id(1)
-    tablecol = models.TableColumn.get_by_id(1)
     component = models.Component.get_by_id(1)
     qc_entity = spec.QCEntity(images=[],
                               entities={},
-                              tpl_label="NEW_NAME",
+                              tpl_label=new_name,
                               tpl_column_name=Template(
                                   settings['column_name']),
                               tpl_row_name=Template(settings['row_name']))
@@ -50,13 +48,55 @@ def test_create_or_update_entity_skips_update_if_flag_not_set(configured_db):
     assert entity.annotation == expected_annotation
 
 
-def test_create_or_update_entity_update_if_update_existing(db):
-    assert False
+def test_create_or_update_entity_update_if_update_existing(configured_db):
+    db, settings = configured_db
+    new_name = "NEW_NAME"
+
+    component = models.Component.get_by_id(1)
+    qc_entity = spec.QCEntity(images=[],
+                              entities={},
+                              tpl_label=new_name,
+                              tpl_column_name=Template(
+                                  settings['column_name']),
+                              tpl_row_name=Template(settings['row_name']))
+
+    dbutils.create_or_update_entity(db,
+                                    component=component,
+                                    qc_entity=qc_entity,
+                                    update_existing=True,
+                                    reset_on_update=False)
+
+    entity = models.Entity.get_by_id(1)
+    expected_rating = models.Rating.get(
+        models.Rating.name == settings['rating_name'])
+    expected_annotation = models.Annotation.get(
+        models.Annotation.name == settings['annotation_name'])
+
+    assert entity.name == new_name
+    assert entity.rating == expected_rating
+    assert entity.annotation == expected_annotation
 
 
-def test_create_or_update_entity_update_and_reset_if_both_flags(db):
-    assert False
+def test_create_or_update_entity_update_and_reset_if_both_flags(configured_db):
+    db, settings = configured_db
+    new_name = "NEW_NAME"
 
+    component = models.Component.get_by_id(1)
+    qc_entity = spec.QCEntity(images=[],
+                              entities={},
+                              tpl_label=new_name,
+                              tpl_column_name=Template(
+                                  settings['column_name']),
+                              tpl_row_name=Template(settings['row_name']))
 
-def test_create_or_update_entity_update_does_nothing_if_existing_no_flags(db):
-    assert False
+    dbutils.create_or_update_entity(db,
+                                    component=component,
+                                    qc_entity=qc_entity,
+                                    update_existing=True,
+                                    reset_on_update=True)
+
+    entity = models.Entity.get_by_id(1)
+
+    assert entity.name == new_name
+    assert entity.rating is None
+    assert entity.annotation is None

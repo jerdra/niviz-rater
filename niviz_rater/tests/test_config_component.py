@@ -1,5 +1,6 @@
 import pytest
 import pkg_resources
+from string import Template
 from itertools import product
 import bids
 import bids.layout.utils as bidsutils
@@ -153,12 +154,14 @@ def test_qc_entities_returns_correct_column():
         "sub-A/anat/sub-A_desc-x_T1w.nii.gz",
         "sub-A/anat/sub-A_desc-y_T1w.nii.gz",
     ],
-                               entities={"subject": "A"},
-                               tpl_label="${subject} TEST",
-                               tpl_column_name="HELLO")
+                              entities={"subject": "A"},
+                              tpl_label="${subject} TEST",
+                              tpl_column_name=Template("HELLO"),
+                              tpl_row_name=Template("ROW"))
 
     assert qc_entity.name == "A TEST"
     assert qc_entity.column_name == "HELLO"
+    assert qc_entity.row_name == "ROW"
 
 
 def test_correct_qc_entities_are_built(make_bidsfile):
@@ -176,7 +179,7 @@ def test_correct_qc_entities_are_built(make_bidsfile):
     }
     bidsfiles = make_bidsfile(**entities)
     component = {
-        "name": "TESTING",
+        "id": "TESTING",
         "entities": ["subject"],
         "label": "${subject} TEST",
         "column": "HELLO",
@@ -187,24 +190,27 @@ def test_correct_qc_entities_are_built(make_bidsfile):
             "desc": "y"
         }]
     }
+    row_description = "ROW_${subject}"
     config_component = spec.ConfigComponent(**component)
-    result = config_component.build_qc_entities(bidsfiles)
+    result = config_component.build_qc_entities(bidsfiles, row_description)
 
     expected_qc_entities = [
         spec.QCEntity(images=[
             "sub-A/anat/sub-A_desc-x_T1w.nii.gz",
             "sub-A/anat/sub-A_desc-y_T1w.nii.gz",
         ],
-                       entities={"subject": "A"},
-                       tpl_label="${subject} TEST",
-                       tpl_column_name="HELLO"),
+                      entities={"subject": "A"},
+                      tpl_label="${subject} TEST",
+                      tpl_column_name="HELLO",
+                      tpl_row_name="ROW_A"),
         spec.QCEntity(images=[
             "sub-B/anat/sub-B_desc-x_T1w.nii.gz",
             "sub-B/anat/sub-B_desc-y_T1w.nii.gz",
         ],
-                       entities={"subject": "B"},
-                       tpl_label="${subject} TEST",
-                       tpl_column_name="HELLO"),
+                      entities={"subject": "B"},
+                      tpl_label="${subject} TEST",
+                      tpl_column_name="HELLO",
+                      tpl_row_name="ROW_B"),
     ]
 
     assert len(result) == len(expected_qc_entities)

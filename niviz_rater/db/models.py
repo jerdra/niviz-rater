@@ -44,9 +44,9 @@ class Component(BaseModel):
             with self.db.atomic():
                 annotation.save()
         except IntegrityError:
-            logger.error(f"Annotation {annotation_name} already exists for "
-                         f"component {self.name}!")
-            logger.error("Skipping creation...")
+            logger.info(f"Annotation {annotation_name} already exists for "
+                        f"component {self.name}!")
+            logger.info("Skipping creation...")
             intended_annot = Annotation.get(
                 (Annotation.component == self)
                 & (Annotation.name == annotation_name))

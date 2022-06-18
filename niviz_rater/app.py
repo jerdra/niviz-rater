@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Any, Dict, Callable, TYPE_CHECKING
 
 from bottle import route, run, static_file, debug, default_app
@@ -26,6 +27,7 @@ if TYPE_CHECKING:
     from bids import BIDSLayout
 
 logger = logging.getLogger(__file__)
+logger.setLevel(logging.INFO)
 
 app = default_app()
 
@@ -109,8 +111,8 @@ def initialize_db(db_settings: Dict[str, Any], config: SpecConfig,
     logging.info("Building Index of QC images")
     for component_entity in config.entities_by_component(bids_layout):
 
+        logger.info(f"Adding {component_entity.component_name} to DB\n")
         logger.info(
-            f"Adding {component_entity.component_name} to DB\n"
             f"Attempting to add {len(component_entity.entities)} records")
 
         dbutils.component_entities_to_db(db, component_entity)
@@ -124,8 +126,8 @@ def update_db(db_name, config: SpecConfig, bids_layout: BIDSLayout,
 
     logging.info("Updating database with new entities...")
     for component_entity in config.entities_by_component(bids_layout):
+        logger.info(f"Adding {component_entity.component_name} to DB\n")
         logger.info(
-            f"Adding {component_entity.component_name} to DB\n"
             f"Attempting to add {len(component_entity.entities)} records")
 
         dbutils.component_entities_to_db(
@@ -180,13 +182,11 @@ def main():
     update_db_parser = subparsers.add_parser('update_db',
                                              help='Update database')
     update_db_parser.add_argument("--update-existing",
-                                  type=bool,
                                   help=("Update existing Entity if it "
                                         "already exists in the database"),
                                   default=False,
                                   action="store_true")
     update_db_parser.add_argument("--no-reset-on-update",
-                                  type=bool,
                                   help=("Do not reset the rating/annotation "
                                         "of the Entity if it is updated\n"
                                         "This flag can only be used "
@@ -216,7 +216,7 @@ def main():
     db_settings = db_settings_from_config(qc_spec, CONFIGURABLE_DB_SETTINGS)
     config = SpecConfig.from_validated(qc_spec)
 
-    bids_layout = get_bids_layout(args.base_directory, config.globals)
+    bids_layout = get_bids_layout(args.base_directory)
 
     # Setup application configuration and DB
     app.config['niviz_rater.base_path'] = args.base_directory

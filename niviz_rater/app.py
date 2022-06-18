@@ -119,14 +119,25 @@ def initialize_db(db_settings: Dict[str, Any], config: SpecConfig,
 
 
 @is_subcommand
-def update_db(db_name, config: SpecConfig, bids_layout: BIDSLayout,
+def update_db(db_file, config: SpecConfig, bids_layout: BIDSLayout,
               update_existing: bool, no_reset_on_update: bool):
+
+    if not Path(db_file).exists():
+        logger.error(f"Did not find existing db_file: {db_file}")
+        logger.error("Use `initialize_db` prior to running `update_db`")
+        return
 
     db = dbutils.fetch_db_from_config(app.config)
 
+    if not dbutils.is_initialized(db):
+        logger.error("Database is not yet initialized, it may be corrupted")
+        logger.error(
+            f"Remove DB {Path(db_file).absolute()} then use `initialize_db`!")
+        return
+
     logging.info("Updating database with new entities...")
     for component_entity in config.entities_by_component(bids_layout):
-        logger.info(f"Adding {component_entity.component_name} to DB\n")
+        logger.info(f"Working on {component_entity.component_name}\n")
         logger.info(
             f"Attempting to add {len(component_entity.entities)} records")
 

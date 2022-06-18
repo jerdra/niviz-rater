@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from niviz_rater.spec import QCEntity
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 def get_or_create_db(
@@ -105,7 +106,7 @@ def create_or_update_entity(db: SqliteDatabase,
             entity.save()
 
     else:
-        logger.info("Skipping update to Entity\n {entity}")
+        logger.info(f"Skipping update to Entity {entity}")
         return
 
 
@@ -144,6 +145,4 @@ def component_entities_to_db(db: SqliteDatabase,
                                 component,
                                 update_existing=update_existing,
                                 reset_on_update=reset_on_update)
-
-        logger.info("Successfully committed Entity to DB")
     return

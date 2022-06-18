@@ -90,13 +90,14 @@ def create_or_update_entity(db: SqliteDatabase,
                                            qc_entity.column_name)
 
     if entity is None:
-        logger.info(f"Creating new Entity\n {entity}")
+        logger.info(f"Creating new Entity\n {qc_entity.name}")
         entity = models.Entity.from_qc_entity(db, qc_entity, component)
 
     elif update_existing:
-        logger.info(f"Updating existing Entity\n {entity}")
+        logger.info(f"Updating existing Entity\n {entity.name}")
         entity.set_images(qc_entity.images)
 
+        logger.info(f"Updating {entity.name} to {qc_entity.name}")
         with db.atomic():
             entity.name = qc_entity.name
             if reset_on_update:

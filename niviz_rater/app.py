@@ -1,4 +1,4 @@
-from typing import Iterable, Any, Dict, Callable
+from typing import Any, Dict, Callable, TYPE_CHECKING
 
 from bottle import route, run, static_file, debug, default_app
 
@@ -21,6 +21,9 @@ from niviz_rater.spec import SpecConfig, db_settings_from_config
 from niviz_rater.validation import validate_config
 
 from niviz_rater.db.models import database_proxy
+
+if TYPE_CHECKING:
+    from bids import BIDSLayout
 
 logger = logging.getLogger(__file__)
 
@@ -88,7 +91,7 @@ def launch_fileserver(base_directory, port=5002, hostname='localhost'):
 
 @is_subcommand
 def initialize_db(db_settings: Dict[str, Any], config: SpecConfig,
-                  bids_layout: Iterable[str]) -> None:
+                  bids_layout: BIDSLayout) -> None:
 
     db = dbutils.fetch_db_from_config(app.config)
 
@@ -100,7 +103,7 @@ def initialize_db(db_settings: Dict[str, Any], config: SpecConfig,
                      " is already initialized!")
         logger.error(
             "Use `update_db` subcommand to add new qc images or annotations"
-            " to DB or use runserver to launch the QC web interface!")
+            " to DB or use `runserver` to launch the QC web interface!")
         return
 
     logging.info("Building Index of QC images")
@@ -114,8 +117,22 @@ def initialize_db(db_settings: Dict[str, Any], config: SpecConfig,
 
 
 @is_subcommand
-def update_db(db_name, base_directory, qc_settings, bids_settings):
-    raise NotImplementedError()
+def update_db(db_name, config: SpecConfig, bids_layout: BIDSLayout,
+              update_existing: bool, no_reset_on_update: bool):
+
+    db = dbutils.fetch_db_from_config(app.config)
+
+    logging.info("Updating database with new entities...")
+    for component_entity in config.entities_by_component(bids_layout):
+        logger.info(
+            f"Adding {component_entity.component_name} to DB\n"
+            f"Attempting to add {len(component_entity.entities)} records")
+
+        dbutils.component_entities_to_db(
+            db,
+            component_entity,
+            update_existing=update_existing,
+            reset_on_update=not no_reset_on_update)
 
 
 @is_subcommand
@@ -155,17 +172,31 @@ def main():
                         help="Path to store SQLite DB containing state")
 
     subparsers = parser.add_subparsers(help='sub-command help')
+
     create_db_parser = subparsers.add_parser('initialize_db',
                                              help='Initialize database')
+    create_db_parser.set_defaults(func=initialize_db)
+
     update_db_parser = subparsers.add_parser('update_db',
                                              help='Update database')
+    update_db_parser.add_argument("--update-existing",
+                                  type=bool,
+                                  help=("Update existing Entity if it "
+                                        "already exists in the database"),
+                                  default=False,
+                                  action="store_true")
+    update_db_parser.add_argument("--no-reset-on-update",
+                                  type=bool,
+                                  help=("Do not reset the rating/annotation "
+                                        "of the Entity if it is updated\n"
+                                        "This flag can only be used "
+                                        "concurrently with --update-existing"),
+                                  default=False,
+                                  action="store_true")
+    update_db_parser.set_defaults(func=update_db)
+
     runserver_parser = subparsers.add_parser('runserver',
                                              help='Run bottle web interface')
-
-    create_db_parser.set_defaults(func=initialize_db)
-    update_db_parser.set_defaults(func=update_db)
-    runserver_parser.set_defaults(func=runserver)
-
     runserver_parser.add_argument("--port",
                                   type=int,
                                   help="Port to use to open server",
@@ -175,6 +206,7 @@ def main():
         type=int,
         help="Port to use for serving local image files",
         default=5001)
+    runserver_parser.set_defaults(func=runserver)
 
     args = parser.parse_args()
     bids_configs = update_bids_configuration(args.bids_settings)

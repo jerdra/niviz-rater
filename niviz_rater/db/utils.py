@@ -122,7 +122,7 @@ def component_entities_to_db(db: SqliteDatabase,
     """
 
     # Create component
-    component: models.Component = models.Component.get_or_create(
+    component, _ = models.Component.get_or_create(
         name=component_entities.component_name)
 
     # Add annotations for component
@@ -146,4 +146,4 @@ def component_entities_to_db(db: SqliteDatabase,
                                 reset_on_update=reset_on_update)
 
         logger.info("Successfully committed Entity to DB")
-        return
+    return

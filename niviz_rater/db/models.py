@@ -108,11 +108,27 @@ class Entity(BaseModel):
         of an object
         """
 
+        try:
+            row = TableRow.get(TableRow.name == qc_entity.row_name)
+            col = TableColumn.get(TableColumn.name == qc_entity.column_name)
+        except TableRow.DoesNotExist as e:
+            logger.error(
+                "Tried to create Entity with row name: {qc_entity.row_name}\n"
+                "but TableRow does not exist!")
+            logger.error(f"Error info: {e}")
+            raise
+        except TableColumn.DoesNotExist as e:
+            logger.error("Tried to create Entity with column name: "
+                         " {qc_entity.column_name}\n"
+                         "but TableColumn does not exist!")
+            logger.error(f"Error info: {e}")
+            raise
+
         with db.atomic():
             entity = cls.create(name=qc_entity.name,
                                 component=component,
-                                rowname=qc_entity.row_name,
-                                columnname=qc_entity.column_name)
+                                rowname=row,
+                                columnname=col)
             entity.set_images(qc_entity.images)
         return entity
 

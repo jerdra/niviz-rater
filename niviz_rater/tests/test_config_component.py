@@ -155,7 +155,7 @@ def test_qc_entities_returns_correct_column():
         "sub-A/anat/sub-A_desc-y_T1w.nii.gz",
     ],
                               entities={"subject": "A"},
-                              tpl_label="${subject} TEST",
+                              tpl_label=Template("${subject} TEST"),
                               tpl_column_name=Template("HELLO"),
                               tpl_row_name=Template("ROW"))
 
@@ -200,7 +200,7 @@ def test_correct_qc_entities_are_built(make_bidsfile):
             "sub-A/anat/sub-A_desc-y_T1w.nii.gz",
         ],
                       entities={"subject": "A"},
-                      tpl_label="${subject} TEST",
+                      tpl_label=Template("${subject} TEST"),
                       tpl_column_name="HELLO",
                       tpl_row_name="ROW_A"),
         spec.QCEntity(images=[
@@ -208,7 +208,7 @@ def test_correct_qc_entities_are_built(make_bidsfile):
             "sub-B/anat/sub-B_desc-y_T1w.nii.gz",
         ],
                       entities={"subject": "B"},
-                      tpl_label="${subject} TEST",
+                      tpl_label=Template("${subject} TEST"),
                       tpl_column_name="HELLO",
                       tpl_row_name="ROW_B"),
     ]

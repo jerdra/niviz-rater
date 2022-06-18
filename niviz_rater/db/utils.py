@@ -84,12 +84,13 @@ def create_or_update_entity(db: SqliteDatabase,
     """
     Create or update an existing Entity
     """
+
     entity = queries.get_entity_by_row_col(qc_entity.row_name,
                                            qc_entity.column_name)
 
     if entity is None:
         logger.info(f"Creating new Entity\n {entity}")
-        entity = models.Entity.from_qc_entity(entity, component)
+        entity = models.Entity.from_qc_entity(db, qc_entity, component)
 
     elif update_existing:
         logger.info(f"Updating existing Entity\n {entity}")
@@ -101,6 +102,7 @@ def create_or_update_entity(db: SqliteDatabase,
                 logger.info("`reset_on_update` set!\n"
                             "Undoing QC for Entity")
                 entity.remove_qc()
+            entity.save()
 
     else:
         logger.info("Skipping update to Entity\n {entity}")

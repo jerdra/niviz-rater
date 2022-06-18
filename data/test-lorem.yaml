@@ -1,13 +1,12 @@
 # Each row of participants.tsv will be a unique combination of the following
 ImageExtensions: ["png", "svg", "jpeg", "jpg", "svg"]
 
-RowDescription:
-  entities: [subject]
-  name: "${subject}"
+RowDescription: "${subject}"
 
 Components:
   - entities: [subject]
-    name: "${subject} lorem1"
+    id: "first_component"
+    label: "${subject} lorem1"
     column: "A"
     images:
       - {description: lorem1}
@@ -19,7 +18,8 @@ Components:
       - Excellent
 
   - entities: [subject]
-    name: "${subject} lorem2-3"
+    id: "second_component"
+    label: "${subject} lorem2-3"
     column: "BC"
     images:
       - {description: lorem2}
@@ -29,7 +29,8 @@ Components:
       - Bad
 
   - entities: [subject]
-    name: "${subject} lorem4-5"
+    id: "third_component"
+    label: "${subject} lorem4-5"
     column: "DE"
     images:
       - {description: lorem4}

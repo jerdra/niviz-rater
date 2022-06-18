@@ -27,17 +27,19 @@ class SpecConfig:
     globals: ConfigGlobals
     components: List[ConfigComponent]
 
+    @classmethod
     def from_validated(cls, config: ValidConfig) -> SpecConfig:
         return cls(globals=ConfigGlobals.from_config(config),
                    components=list(ConfigComponent.yield_from_config(config)))
 
     def entities_by_component(
             self, layout: BIDSLayout) -> Iterable[ComponentEntities]:
+
         bidsfiles = layout.get(extension=self.globals.image_extensions)
 
         for component in self.components:
             yield ComponentEntities(
-                component_name=component.name,
+                component_name=component.id,
                 available_annotations=component.available_annotations,
                 entities=component.build_qc_entities(
                     bidsfiles, self.globals.row_description))
@@ -52,6 +54,7 @@ class ConfigGlobals:
     image_extensions: List[str]
     row_description: str
 
+    @classmethod
     def from_config(cls, config: ValidConfig) -> ConfigGlobals:
 
         return cls(image_extensions=config['ImageExtensions'],
@@ -65,13 +68,13 @@ class QCEntity:
     """
     images: list
     entities: dict
-    tpl_label: str
+    tpl_label: Template
     tpl_column_name: Template
     tpl_row_name: Template
 
     @property
     def name(self):
-        return Template(self.tpl_label).substitute(self.entities)
+        return self.tpl_label.substitute(self.entities)
 
     @property
     def column_name(self):
@@ -159,7 +162,7 @@ class ConfigComponent:
                              k: matched_images[0].entities[k]
                              for k in self.entities
                          },
-                         tpl_label=self.label,
+                         tpl_label=Template(self.label),
                          tpl_column_name=Template(self.column),
                          tpl_row_name=Template(row_description)))
 

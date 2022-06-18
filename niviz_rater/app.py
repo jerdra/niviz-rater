@@ -151,8 +151,8 @@ def update_db(db_file, config: SpecConfig, bids_layout: BIDSLayout,
 @is_subcommand
 def runserver(base_directory: str, fileserver_port: int, port: int):
     _, address = launch_fileserver(base_directory, port=fileserver_port)
-    app.config['niviz_rater.fileserver'] = address
 
+    app.config['niviz_rater.fileserver'] = address
     app.merge(apiRoutes)
     debug(True)
     run(host='localhost', port=port)

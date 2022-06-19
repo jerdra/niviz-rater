@@ -5,8 +5,8 @@ API for accessing and updating stored QC Index
 import os
 from bottle import route, Bottle, request, response
 
-from niviz_rater.db import fetch_db_from_config
-from niviz_rater.models import (Entity, Image, TableRow, TableColumn,
+from niviz_rater.db.utils import fetch_db_from_config
+from niviz_rater.db.models import (Entity, Image, TableRow, TableColumn,
                                 Annotation, Rating)
 import logging
 from peewee import JOIN, prefetch

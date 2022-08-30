@@ -43,7 +43,7 @@ def test_component_add_annotation_does_not_create_when_already_exists(db):
 
 def test_entity_entry_formatted_correctly(configured_db):
 
-    db, settings = configured_db
+    db, settings, _ = configured_db
 
     annotation_name = settings['annotation_name']
     rating_name = settings['rating_name']
@@ -57,7 +57,7 @@ def test_entity_entry_formatted_correctly(configured_db):
 
 def test_entity_add_image_updates_db(configured_db):
 
-    db, settings = configured_db
+    db, settings, _ = configured_db
 
     entity = models.Entity.get_by_id(1)
     image_path = Path("/this/is/a/path")
@@ -73,7 +73,7 @@ def test_entity_add_image_updates_db(configured_db):
 
 def test_adding_same_image_to_entity_returns_same_image(configured_db):
 
-    db, settings = configured_db
+    db, settings, _ = configured_db
 
     entity = models.Entity.get_by_id(1)
     image_path = Path("/this/is/a/path")
@@ -86,7 +86,7 @@ def test_adding_same_image_to_entity_returns_same_image(configured_db):
 
 def test_entity_update_annotation_sets_correctly_if_configured(configured_db):
 
-    db, settings = configured_db
+    db, settings, _ = configured_db
 
     entity = models.Entity.get_by_id(1)
     component = models.Component.get_by_id(1)
@@ -99,13 +99,12 @@ def test_entity_update_annotation_sets_correctly_if_configured(configured_db):
         # Update annotation using just name
         entity.update_annotation(new_annotation_name)
 
-    #
     assert entity.annotation == new_annotation
 
 
 def test_entity_update_annotation_creates_if_flag_set(configured_db):
 
-    db, settings = configured_db
+    db, settings, _ = configured_db
     entity = models.Entity.get_by_id(1)
 
     # Add new annotation
@@ -120,7 +119,7 @@ def test_entity_update_annotation_creates_if_flag_set(configured_db):
 
 def test_entity_update_annotation_does_nothing_if_flag_not_set(configured_db):
 
-    db, settings = configured_db
+    db, settings, _ = configured_db
     entity = models.Entity.get_by_id(1)
 
     # Add new annotation
@@ -137,7 +136,7 @@ def test_entity_update_annotation_does_nothing_if_flag_not_set(configured_db):
 
 def test_entity_update_rating_sets_if_rating_exists(configured_db):
 
-    db, settings = configured_db
+    db, settings, _ = configured_db
 
     entity = models.Entity.get_by_id(1)
 
@@ -152,7 +151,7 @@ def test_entity_update_rating_sets_if_rating_exists(configured_db):
 
 def test_entity_update_rating_does_nothing_if_rating_invalid(configured_db):
 
-    db, settings = configured_db
+    db, settings, _ = configured_db
     entity = models.Entity.get_by_id(1)
     rating = models.Rating.get(models.Rating.name == settings['rating_name'])
 
@@ -165,7 +164,7 @@ def test_entity_update_rating_does_nothing_if_rating_invalid(configured_db):
 
 def test_set_images_fully_replaces_images(configured_db):
 
-    db, settings = configured_db
+    db, settings, _ = configured_db
     entity = models.Entity.get_by_id(1)
 
     old_images = [Path(i) for i in ["/a/", "/b/", "/c/"]]

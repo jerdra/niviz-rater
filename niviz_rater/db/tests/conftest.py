@@ -60,9 +60,15 @@ def configure_db(db, annotation_name, rating_name, comment, settings,
                          comment=comment,
                          rating=rating,
                          annotation=annotation)
+    foreign_keys = {
+            "rowname": tr,
+            "component": component
+    }
+
+    return foreign_keys
 
 
 @pytest.fixture
 def configured_db(db, settings):
-    configure_db(db, **settings)
-    return db, settings
+    foreign_keys = configure_db(db, **settings)
+    return db, settings, foreign_keys

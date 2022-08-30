@@ -1,7 +1,4 @@
-from unittest.mock import patch
-from peewee import SqliteDatabase
 from string import Template
-from niviz_rater.db.models import database_proxy
 import niviz_rater.db.models as models
 import niviz_rater.db.utils as dbutils
 import niviz_rater.spec as spec
@@ -22,7 +19,7 @@ def test_ratings_are_initialized_with_settings(db):
 
 def test_create_or_update_entity_skips_update_if_flag_not_set(configured_db):
 
-    db, settings = configured_db
+    db, settings, _ = configured_db
     new_name = "NEW_NAME"
 
     component = models.Component.get_by_id(1)
@@ -49,7 +46,7 @@ def test_create_or_update_entity_skips_update_if_flag_not_set(configured_db):
 
 
 def test_create_or_update_entity_update_if_update_existing(configured_db):
-    db, settings = configured_db
+    db, settings, _ = configured_db
     new_name = "NEW_NAME"
 
     component = models.Component.get_by_id(1)
@@ -78,7 +75,7 @@ def test_create_or_update_entity_update_if_update_existing(configured_db):
 
 
 def test_create_or_update_entity_update_and_reset_if_both_flags(configured_db):
-    db, settings = configured_db
+    db, settings, _ = configured_db
     new_name = "NEW_NAME"
 
     component = models.Component.get_by_id(1)

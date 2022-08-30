@@ -71,7 +71,7 @@ class Entity(Model):
         else:
             rating = self.rating.name
 
-        return (annotation, rating, self.comment or "")
+        return (annotation, rating, self.comment.replace("\n","\\n") or "")
 
 
 class Image(BaseModel):

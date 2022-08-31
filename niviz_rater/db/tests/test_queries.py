@@ -46,3 +46,16 @@ def test_denormalized_entities_returns_fully_populated_models(configured_db):
     for result, expect in zip(sorted(results, key=lambda x: x.id),
                               [e1, e2, e3]):
         assert result == expect
+
+
+def test_get_denormalized_by_id_returns_fully_populated_entity(configured_db):
+
+    db, settings, foreign_keys = configured_db
+
+    e2 = _create_entity_column("anentity", "acolumnname", foreign_keys)
+    rating = models.Rating.get_by_id(1)
+    _create_entity_column("anotherentity", "anothercolumnname", foreign_keys,
+                          rating)
+
+    result = queries.get_denormalized_entity_by_id(2)
+    assert e2 == result

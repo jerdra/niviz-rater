@@ -4,7 +4,7 @@ from typing import Optional, Tuple, List
 import logging
 from peewee import JOIN
 from niviz_rater.db.models import (Entity, Component, TableColumn, TableRow,
-                                   Rating, Image)
+                                   Rating, Image, Annotation)
 
 logger = logging.getLogger(__name__)
 
@@ -93,3 +93,10 @@ def get_denormalized_entity_by_id(entity_id: int) -> Entity:
     if len(q) != 1:
         raise ValueError(f"Expected 1 Entity, received {len(q)}!")
     return q[0]
+
+
+def get_available_annotations(entity: Entity) -> List[Annotation]:
+
+    annotations = Annotation.select().where(
+        Annotation.component == entity.component)
+    return annotations

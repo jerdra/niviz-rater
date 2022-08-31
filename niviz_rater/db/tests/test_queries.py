@@ -54,8 +54,13 @@ def test_denormalized_entities_returns_fully_denormalied_models(configured_db):
     with count_queries() as counter:
         for entity in results:
             entity.component.name
-            entity.annotation.name
-            entity.rating.name
+
+            if entity.annotation:
+                entity.annotation.name
+
+            if entity.rating:
+                entity.rating.name
+
             [i.path for i in entity.images]
 
     assert counter.count == 0

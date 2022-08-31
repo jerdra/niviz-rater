@@ -60,13 +60,33 @@ def get_denormalized_entities() -> List[Entity]:
     Return Entities joined against all dimension tables
 
     Returns:
-        entities (List[Entities]): List of all entities with foreign keys
+        entities (List[Entity]): List of all entities with foreign keys
             joined and Images prefetched
     """
 
-    q = (Entity.select(Entity, TableRow, TableColumn,
-                       Rating).join(TableRow).join_from(
+    q = (Entity.select(Entity, TableRow,
+                       TableColumn, Rating).join(TableRow).join_from(
                            Entity, TableColumn).join_from(
                                Entity, Rating,
                                JOIN.LEFT_OUTER).switch(Entity).prefetch(Image))
     return q
+
+
+def get_denormalized_entity_by_id(entity_id: int) -> Entity:
+    """
+    Return Entity joined against all dimension tables
+
+    Returns:
+        entity (Entity): Entity with foreign keys joined
+            and Images prefetched
+    """
+
+    q = (Entity.select(
+        Entity, TableRow, TableColumn,
+        Rating).join(TableRow).join_from(Entity, TableColumn).join_from(
+            Entity, Rating,
+            JOIN.LEFT_OUTER).where(Entity.id == entity_id).prefetch(Image))
+
+    if len(q) != 1:
+        raise ValueError(f"Expected 1 Entity, received {len(q)}!")
+    return q[0]

@@ -138,3 +138,17 @@ def test_get_denormalized_table_rows(configured_db):
                     entity.annotation.name
 
     assert counter.count == 0
+
+def test_get_table_columns_returns_ordered_columns(db):
+
+
+    db.create_tables(models.DB_TABLES)
+    tc1 = models.TableColumn.create(name="a")
+    tc3 = models.TableColumn.create(name="c")
+    tc2 = models.TableColumn.create(name="b")
+
+    result = queries.get_columns()
+
+    assert len(result) == 3
+    for result, expect in zip(result, [tc1, tc2, tc3]):
+        assert result == expect

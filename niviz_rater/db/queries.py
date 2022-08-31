@@ -56,6 +56,13 @@ def get_summary() -> Tuple[int, int, int]:
 
 
 def get_denormalized_entities() -> List[Entity]:
+    """
+    Return Entities joined against all dimension tables
+
+    Returns:
+        entities (List[Entities]): List of all entities with foreign keys
+            joined and Images prefetched
+    """
 
     q = (Entity.select(Entity).join(TableRow).join_from(
         Entity,

@@ -53,7 +53,7 @@ def configure_db(db, annotation_name, available_annotations, rating_name,
         component.save()
 
         for annotation in available_annotations:
-            component.add_annotation(annotation)
+            models.Annotation.create(name=annotation, component=component)
 
     rating = models.Rating.get(models.Rating.name == rating_name)
 

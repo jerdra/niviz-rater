@@ -106,3 +106,12 @@ def get_available_annotations(entity: Entity) -> List[Annotation]:
     annotations = Annotation.select().where(
         Annotation.component == entity.component)
     return annotations
+
+
+def get_denormalized_rows() -> List[TableRow]:
+    """
+    Return Entity-denormalized Table Rows
+    """
+    entity_query = _denormalized_query()
+    rows = TableRow.select().order_by(TableRow.name).prefetch(entity_query)
+    return rows

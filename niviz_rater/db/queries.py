@@ -115,3 +115,10 @@ def get_denormalized_rows() -> List[TableRow]:
     entity_query = _denormalized_query()
     rows = TableRow.select().order_by(TableRow.name).prefetch(entity_query)
     return rows
+
+
+def get_columns() -> List[TableColumn]:
+    """
+    Returns ordered list of all TableColumn models
+    """
+    return TableColumn.select().order_by(TableColumn.name)

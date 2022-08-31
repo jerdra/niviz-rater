@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Optional, Tuple, List
 import logging
-from peewee import JOIN
+from peewee import JOIN, ModelSelect
 from niviz_rater.db.models import (Entity, Component, TableColumn, TableRow,
                                    Rating, Image, Annotation)
 
@@ -55,6 +55,22 @@ def get_summary() -> Tuple[int, int, int]:
     return total, n_rated, n_unrated
 
 
+def _denormalized_query() -> ModelSelect:
+    """
+    Return denormalized Entity query with all foreign keys joined
+    To attach images use a `prefetch`
+    """
+
+    q = (Entity.select(
+        Entity, TableRow, TableColumn, Rating,
+        Annotation, Component).join_from(Entity, TableRow).join_from(
+            Entity,
+            TableColumn).join_from(Entity, Rating, JOIN.LEFT_OUTER).join_from(
+                Entity, Annotation,
+                JOIN.LEFT_OUTER).join_from(Entity, Component).switch(Entity))
+    return q
+
+
 def get_denormalized_entities() -> List[Entity]:
     """
     Return Entities joined against all dimension tables
@@ -63,12 +79,7 @@ def get_denormalized_entities() -> List[Entity]:
         entities (List[Entity]): List of all entities with foreign keys
             joined and Images prefetched
     """
-
-    q = (Entity.select(Entity, TableRow,
-                       TableColumn, Rating).join(TableRow).join_from(
-                           Entity, TableColumn).join_from(
-                               Entity, Rating,
-                               JOIN.LEFT_OUTER).switch(Entity).prefetch(Image))
+    q = _denormalized_query().prefetch(Image)
     return q
 
 
@@ -83,12 +94,7 @@ def get_denormalized_entity_by_id(entity_id: int) -> Entity:
     Raises:
         ValueError: If more than 1 entity is found to contain a given ID
     """
-
-    q = (Entity.select(
-        Entity, TableRow, TableColumn,
-        Rating).join(TableRow).join_from(Entity, TableColumn).join_from(
-            Entity, Rating,
-            JOIN.LEFT_OUTER).where(Entity.id == entity_id).prefetch(Image))
+    q = _denormalized_query().where(Entity.id == entity_id).prefetch(Image)
 
     if len(q) != 1:
         raise ValueError(f"Expected 1 Entity, received {len(q)}!")

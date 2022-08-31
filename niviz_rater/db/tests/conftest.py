@@ -24,6 +24,7 @@ def db():
 def settings():
     return {
         "annotation_name": "12345",
+        "available_annotations": ["12345", "ABCDEFG", "QWERTY"],
         "rating_name": "A",
         "comment": "A COMMENT",
         "settings": {
@@ -36,8 +37,9 @@ def settings():
     }
 
 
-def configure_db(db, annotation_name, rating_name, comment, settings,
-                 column_name, row_name, component_name, entity_name):
+def configure_db(db, annotation_name, available_annotations, rating_name,
+                 comment, settings, column_name, row_name, component_name,
+                 entity_name):
 
     db = dbutils.initialize_tables(db, settings)
 
@@ -49,8 +51,12 @@ def configure_db(db, annotation_name, rating_name, comment, settings,
         tr.save()
         tc.save()
         component.save()
-        annotation = component.add_annotation(annotation_name)
+        for annotation in available_annotations:
+            component.add_annotation(annotation_name)
+
     rating = models.Rating.get(models.Rating.name == rating_name)
+    annotation = models.Annotation.get(
+        models.Annotation.name == annotation_name)
 
     # Create Entity
     models.Entity.create(name=entity_name,
@@ -60,10 +66,7 @@ def configure_db(db, annotation_name, rating_name, comment, settings,
                          comment=comment,
                          rating=rating,
                          annotation=annotation)
-    foreign_keys = {
-            "rowname": tr,
-            "component": component
-    }
+    foreign_keys = {"rowname": tr, "component": component}
 
     return foreign_keys
 

@@ -79,6 +79,9 @@ def get_denormalized_entity_by_id(entity_id: int) -> Entity:
     Returns:
         entity (Entity): Entity with foreign keys joined
             and Images prefetched
+
+    Raises:
+        ValueError: If more than 1 entity is found to contain a given ID
     """
 
     q = (Entity.select(

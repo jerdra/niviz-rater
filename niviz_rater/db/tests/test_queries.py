@@ -107,3 +107,34 @@ def test_get_available_annotations(configured_db):
 
     expected_names = settings["available_annotations"]
     assert set(expected_names) == set(annotation_names)
+
+
+def test_get_denormalized_table_rows(configured_db):
+
+    db, settings, foreign_keys = configured_db
+
+    _create_entity_column("anentity", "acolumn", foreign_keys)
+    _create_entity_column("anotherentity", "anothercolumn", foreign_keys)
+
+    new_row_key = models.TableRow.create(name="anotherrow")
+    new_row_key.save()
+    new_row_fkey = {"component": foreign_keys["component"], **foreign_keys}
+    _create_entity_column("newrowentity", "acolumn", new_row_fkey)
+    _create_entity_column("anothernewrowentity", "anothercolumn", new_row_fkey)
+
+    results = queries.get_denormalized_rows()
+    expected_rows = [foreign_keys["rowname"], new_row_key]
+    assert set(results) == set(expected_rows)
+
+    # Check denormalized
+    with count_queries() as counter:
+        for row in results:
+            for entity in row.entities:
+                entity.component.name
+                entity.columnname.name
+                if entity.rating:
+                    entity.rating.name
+                if entity.annotation:
+                    entity.annotation.name
+
+    assert counter.count == 0

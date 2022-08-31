@@ -1,5 +1,6 @@
 import niviz_rater.db.queries as queries
 import niviz_rater.db.models as models
+from playhouse.shortcuts import model_to_dict
 
 
 def _create_entity_column(name, columnname, foreign_keys, rating=None):
@@ -34,3 +35,14 @@ def test_summary_returns_correct_number_of_entities(configured_db):
 def test_denormalized_entities_returns_fully_populated_models(configured_db):
 
     db, settings, foreign_keys = configured_db
+
+    e1 = models.Entity.get_by_id(1)
+    e2 = _create_entity_column("anentity", "acolumnname", foreign_keys)
+    rating = models.Rating.get_by_id(1)
+    e3 = _create_entity_column("anotherentity", "anothercolumnname",
+                               foreign_keys, rating)
+
+    results = queries.get_denormalized_entities()
+    for result, expect in zip(sorted(results, key=lambda x: x.id),
+                              [e1, e2, e3]):
+        assert result == expect

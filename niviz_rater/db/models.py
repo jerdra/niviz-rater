@@ -133,9 +133,10 @@ class Entity(BaseModel):
         return entity
 
     def __repr__(self):
-        return (f"Name:  {self.name}\n"
-                f"Row: {self.rowname}\n"
-                f"Column: {self.columnname}")
+        return (f"<Entity: {self.id},"
+                f" name: {self.name},"
+                f" row: {self.rowname},"
+                f" column: {self.columnname}>")
 
     @property
     def entry(self):

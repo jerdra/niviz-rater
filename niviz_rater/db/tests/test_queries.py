@@ -81,6 +81,21 @@ def test_get_denormalized_by_id_returns_fully_populated_entity(configured_db):
     result = queries.get_denormalized_entity_by_id(2)
     assert e2 == result
 
+    with count_queries() as counter:
+        result.component.name
+        result.rowname.name
+        result.columnname.name
+
+        if result.annotation:
+            result.annotation.name
+
+        if result.rating:
+            result.rating.name
+
+        [i.path for i in result.images]
+
+    assert counter.count == 0
+
 
 def test_get_available_annotations(configured_db):
 

@@ -59,3 +59,15 @@ def test_get_denormalized_by_id_returns_fully_populated_entity(configured_db):
 
     result = queries.get_denormalized_entity_by_id(2)
     assert e2 == result
+
+
+def test_get_available_annotations(configured_db):
+
+    db, settings, foreign_keys = configured_db
+    entity = models.Entity.get_by_id(1)
+    annotation_names = [
+        a.name for a in queries.get_available_annotations(entity)
+    ]
+
+    expected_names = settings["available_annotations"]
+    assert set(expected_names) == set(annotation_names)

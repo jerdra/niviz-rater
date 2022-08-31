@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 import logging
 from peewee import JOIN
-from niviz_rater.db.models import (
-        Entity, Component, TableColumn, TableRow
-        )
-
+from niviz_rater.db.models import (Entity, Component, TableColumn, TableRow,
+                                   Rating, Image)
 
 logger = logging.getLogger(__name__)
 
@@ -14,17 +12,14 @@ logger = logging.getLogger(__name__)
 def get_component(component_name: str, create=False) -> Component:
 
     if create:
-        component = Component.get_or_create(
-            Component.name == component_name)
+        component = Component.get_or_create(Component.name == component_name)
     else:
-        component = Component.get(
-            Component.name == component_name)
+        component = Component.get(Component.name == component_name)
 
     return component
 
 
-def get_entity_by_row_col(row_name: str,
-                          col_name: str) -> Optional[Entity]:
+def get_entity_by_row_col(row_name: str, col_name: str) -> Optional[Entity]:
     """
     Return an Entity by it's unique row/col combination
     """
@@ -44,6 +39,7 @@ def get_entity_by_row_col(row_name: str,
 
     return result.first()
 
+
 def get_summary() -> Tuple[int, int, int]:
     """
     Get number of Entities that have yet to be rated
@@ -57,3 +53,12 @@ def get_summary() -> Tuple[int, int, int]:
     n_rated = total - n_unrated
 
     return total, n_rated, n_unrated
+
+
+def get_denormalized_entities() -> List[Entity]:
+
+    q = (Entity.select(Entity).join(TableRow).join_from(
+        Entity,
+        TableColumn).join_from(Entity, Rating,
+                               JOIN.LEFT_OUTER).switch(Entity).prefetch(Image))
+    return q

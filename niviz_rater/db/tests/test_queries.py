@@ -53,7 +53,10 @@ def test_denormalized_entities_returns_fully_denormalied_models(configured_db):
     # No additional queries should be made (data is fully denormalized)
     with count_queries() as counter:
         for entity in results:
+
             entity.component.name
+            entity.rowname.name
+            entity.columnname.name
 
             if entity.annotation:
                 entity.annotation.name

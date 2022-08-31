@@ -64,8 +64,9 @@ def get_denormalized_entities() -> List[Entity]:
             joined and Images prefetched
     """
 
-    q = (Entity.select(Entity).join(TableRow).join_from(
-        Entity,
-        TableColumn).join_from(Entity, Rating,
+    q = (Entity.select(Entity, TableRow, TableColumn,
+                       Rating).join(TableRow).join_from(
+                           Entity, TableColumn).join_from(
+                               Entity, Rating,
                                JOIN.LEFT_OUTER).switch(Entity).prefetch(Image))
     return q

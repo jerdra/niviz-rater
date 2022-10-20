@@ -7,7 +7,6 @@ from bottle import route, Bottle, request, response
 
 from niviz_rater.db.utils import fetch_db_from_config
 import niviz_rater.db.queries as queries
-from niviz_rater.db.models import Rating
 from niviz_rater.config import db_defaults
 import logging
 
@@ -68,7 +67,7 @@ def ratings():
     """
     Return list of available ratings
     """
-    valid_rating = [_rating(r) for r in Rating.select()]
+    valid_rating = [_rating(r) for r in queries.get_avilable_ratings()]
     return {"validRatings": valid_rating}
 
 
@@ -149,7 +148,7 @@ def get_entity_view(entity_id):
 
     entity = queries.get_denormalized_entity_by_id(entity_id)
     available_annotations = [
-        _annotation(r) for r in queries.get_available_annotations(entity)
+        _annotation(a) for a in queries.get_available_annotations(entity)
     ]
 
     response = {

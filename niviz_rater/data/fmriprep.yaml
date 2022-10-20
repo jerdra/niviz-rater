@@ -1,0 +1,39 @@
+# Each row of participants.tsv will be a unique combination of the following
+ImageExtensions: ["png", "svg", "jpeg", "jpg", "svg"]
+
+RowDescription: "${subject}"
+
+Components:
+  - entities: [subject]
+    id: "Anatomical"
+    label: "${subject} anatomical"
+    column: "anatomical"
+    images:
+      - {suffix: dseg}
+      - {desc: reconall}
+      - {space: MNI152NLin2009cAsym, suffix: T1w}
+    annotations:
+      - Major Skullstrip Brain Clip
+      - BET Segmentation issue
+      - Skullstrip Clips Temporal Region
+      - MNI Warp Issues
+
+  - entities: [subject, session, task, run]
+    id: "Functional"
+    label: "${subject} session:${session} task:${task} run:${run} fMRI"
+    column: "ses-${session}_task-${task}_run-${run}"
+    images:
+      - {desc: bbregister}
+      - {desc: sdc}
+      - {desc: rois}
+    annotations:
+      - Inconsistent Intensity Patch
+      - In-plane Intensity Change
+      - EPI Signal Dropout
+      - Overinclusive EPI Brainmask
+      - EPI Strong Bias Field
+      - Clipping
+      - SDC Mis-correction
+      - EPI-to-T1 Mismatch
+      - Background Peripheral EPI Artifact
+

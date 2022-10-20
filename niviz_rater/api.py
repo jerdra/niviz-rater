@@ -7,7 +7,7 @@ from bottle import route, Bottle, request, response
 
 from niviz_rater.db.utils import fetch_db_from_config
 import niviz_rater.db.queries as queries
-from niviz_rater.db.models import (TableRow, TableColumn, Rating)
+from niviz_rater.db.models import Rating
 from niviz_rater.config import db_defaults
 import logging
 

@@ -90,9 +90,7 @@
 				<ItemRatingView 
 					item={item}
 					bind:this={modalData}
-					bind:rating={itemRating.rating}
-					bind:comment={itemRating.comment}
-					bind:annotation={itemRating.annotation}/>
+					bind:itemRating={itemRating}/>
 			</section>
 
 			<footer class="modal-card-foot">

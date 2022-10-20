@@ -101,11 +101,16 @@ def get_denormalized_entity_by_id(entity_id: int) -> Entity:
     return q[0]
 
 
-def get_available_annotations(entity: Entity) -> List[Annotation]:
+def get_available_annotations(entity: Entity) -> List[Optional[Annotation]]:
 
     annotations = Annotation.select().where(
         Annotation.component == entity.component)
-    return annotations
+    return [None, *annotations]
+
+
+def get_avilable_ratings() -> List[Optional[Rating]]:
+    ratings = Rating.select()
+    return [None, *ratings]
 
 
 def get_denormalized_rows() -> List[TableRow]:

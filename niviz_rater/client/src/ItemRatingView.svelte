@@ -14,9 +14,7 @@
 	import { onMount, getContext } from 'svelte';
 
 	export let item;
-	export let rating;
-	export let comment;
-	export let annotation_id;
+  export let itemRating;
   const { getValidRatings } = getContext("validRatings");
 	let focused = false;
 
@@ -28,7 +26,7 @@
 
 	export function setAnnotation(num){
 		if (availableAnnotations.includes(num)){
-			annotation_id=num;
+			itemRating.annotation=num;
 		} else {
 			console.log("Not an available rating")
 		}
@@ -54,7 +52,7 @@
 		<div class="tile is-parent is-vertical">
 			<div class="tile is-child">
 				<div class="select">
-					<select bind:value={annotation_id}>
+					<select bind:value={itemRating.annotation}>
 						{#each item.availableAnnotations as annotation (annotation)}
 							<option value={annotation.id}>{annotation.name}</option>
 						{/each}
@@ -66,9 +64,9 @@
 					{#each getValidRatings() as {id, name} (id)}
 						<label class="radio">
 							<input type="radio"
-								  use:markRadioDefault={id == rating}
+								  use:markRadioDefault={id == itemRating.rating}
 								  name="passfail"
-								 value={id} bind:group={rating}>
+								 value={id} bind:group={itemRating.rating}>
 							{name}
 						</label>
 					{/each}
@@ -77,7 +75,7 @@
 		</div>
 		<div class="tile is-child">
 			Comments:
-			<textarea bind:value={comment} on:focus={onFocus} on:blur={onBlur}
+			<textarea bind:value={itemRating.comment} on:focus={onFocus} on:blur={onBlur}
 				class="textarea" placeholder="Comments"></textarea>
 		</div>
 	</div>

@@ -5,11 +5,10 @@ API for accessing and updating stored QC Index
 import os
 from bottle import route, Bottle, request, response
 
-from niviz_rater.db import fetch_db_from_config
-from niviz_rater.models import (Entity, Image, TableRow, TableColumn,
-                                Annotation, Rating)
+from niviz_rater.db.utils import fetch_db_from_config
+import niviz_rater.db.queries as queries
+from niviz_rater.config import db_defaults
 import logging
-from peewee import JOIN, prefetch
 
 apiRoutes = Bottle()
 logger = logging.getLogger(__file__)
@@ -29,11 +28,17 @@ def _fileserver(path, app_config):
 
 
 def _annotation(annotation):
-    return {'id': annotation.id, 'name': annotation.name}
+    if annotation is None:
+        return {'id': None, 'name': db_defaults.DEFAULT_ANNOTATION}
+    else:
+        return {'id': annotation.id, 'name': annotation.name}
 
 
 def _rating(rating):
-    return {'id': rating.id, 'name': rating.name}
+    if rating is None:
+        return {'id': None, 'name': db_defaults.DEFAULT_RATING}
+    else:
+        return {'id': rating.id, 'name': rating.name}
 
 
 @route('/api/overview')
@@ -45,18 +50,15 @@ def summary():
         - remaining un-rated images
         - total number of annotations required
     """
-    n_unrated = (Entity.select().join(Rating).where(
-        Rating.name == "None").count())
+
+    total, n_rated, n_unrated = queries.get_summary()
     logger.info(f"Number of unrated scans is: {n_unrated}")
 
-    n_rows = TableRow.select().count()
-    n_cols = TableColumn.select().count()
-    n_entities = Entity.select().count()
     return {
         "numberOfUnrated": n_unrated,
-        "numberOfRows": n_rows,
-        "numberOfColumns": n_cols,
-        "numberOfEntities": n_entities
+        "numberOfRated": n_rated,
+        "numberOfRows": 0,
+        "numberOfEntities": total
     }
 
 
@@ -65,7 +67,7 @@ def ratings():
     """
     Return list of available ratings
     """
-    valid_rating = [_rating(r) for r in Rating.select()]
+    valid_rating = [_rating(r) for r in queries.get_avilable_ratings()]
     return {"validRatings": valid_rating}
 
 
@@ -76,12 +78,10 @@ def spreadsheet():
     interactive table, yields for each TableRow it's
     set of entities
     """
-
-    q = (Entity.select(Entity).join(TableRow).switch(Entity).join(TableColumn).
-         switch(Entity).join(Rating).switch(Entity).prefetch(Image))
+    entities = queries.get_denormalized_entities()
 
     # Need to remove base path
-    r = {
+    payload = {
         "entities": [{
             "rowName":
             e.rowname.name,
@@ -99,34 +99,40 @@ def spreadsheet():
             e.name,
             "annotation":
             _annotation(e.annotation)
-        } for e in q]
+        } for e in entities]
     }
-    return r
+    return payload
 
 
 @route('/api/entity/<entity_id:int>')
 def get_entity_info(entity_id):
     try:
-        e = (Entity.select(Entity).join(TableRow).switch(Entity).join(
-            TableColumn).switch(Entity).join(Rating).switch(Entity).where(
-                Entity.id == entity_id).prefetch(Image))[0]
-    except IndexError:
-        logger.error("Cannot find entity with specified ID!")
+        entity = queries.get_denormalized_entity_by_id(entity_id)
+    except ValueError as e:
+        logger.error(f"Issue with obtaining Entity with id {entity_id}")
+        logger.error(f"Error msg: {e}")
         response.status_code = 400
         return
 
-    r = {
-        "name": e.name,
-        "annotation": _annotation(e.annotation),
-        "comment": e.comment,
-        "rating": _rating(e.rating),
+    payload = {
+        "name":
+        entity.name,
+        "annotation":
+        _annotation(entity.annotation),
+        "comment":
+        entity.comment,
+        "rating":
+        _rating(entity.rating),
         "imagePaths":
-        [_fileserver(i.path, request.app.config) for i in e.images],
-        "id": e.id,
-        "rowName": e.rowname.name,
-        "columnName": e.columnname.name
+        [_fileserver(i.path, request.app.config) for i in entity.images],
+        "id":
+        entity.id,
+        "rowName":
+        entity.rowname.name,
+        "columnName":
+        entity.columnname.name
     }
-    return r
+    return payload
 
 
 @route('/api/entity/<entity_id:int>/view')
@@ -140,29 +146,32 @@ def get_entity_view(entity_id):
         current annotation for a given entity
     """
 
-    entity = Entity.select().where(Entity.id == entity_id).first()
-    images = Image.select(Image,
-                          Entity).join(Entity).where(Image.entity == entity)
-
-    q_annotation = Annotation.select().where(
-        Annotation.component_id == entity.component_id)
-    available_annotations = [_annotation(r) for r in q_annotation]
+    entity = queries.get_denormalized_entity_by_id(entity_id)
+    available_annotations = [
+        _annotation(a) for a in queries.get_available_annotations(entity)
+    ]
 
     response = {
-        "entityId": entity.id,
-        "entityName": entity.name,
-        "entityAnnotation": _annotation(entity.annotation),
-        "entityComment": entity.comment,
-        "entityAvailableAnnotations": available_annotations,
+        "entityId":
+        entity.id,
+        "entityName":
+        entity.name,
+        "entityAnnotation":
+        _annotation(entity.annotation),
+        "entityComment":
+        entity.comment,
+        "entityAvailableAnnotations":
+        available_annotations,
         "entityImages":
-        [_fileserver(i.path, request.app.config) for i in images],
-        "entityRating": _rating(entity.rating)
+        [_fileserver(i.path, request.app.config) for i in entity.images],
+        "entityRating":
+        _rating(entity.rating)
     }
     return response
 
 
 @route('/api/entity', method='POST')
-def update_annotation():
+def update_entity():
     """
     Post body should contain information about:
         -   annotation_id
@@ -180,11 +189,13 @@ def update_annotation():
     logger.info(update_keys)
 
     # Select entity
-    entity = Entity.select().where(Entity.id == data['id']).first()
+    entity = queries.get_denormalized_entity_by_id(data['id'])
     logger.info(data)
 
     # Update entity with available keys
     db = fetch_db_from_config(request.app.config)
+
+    # TODO: Pull this out into a query function
     with db.atomic():
         for k in update_keys:
             setattr(entity, k, data[k])
@@ -201,14 +212,10 @@ def export_csv():
     Export participants.tsv CSV file
     """
 
-    entities = (Entity.select(Entity, TableColumn, Annotation, Rating).join(
-        Annotation, JOIN.LEFT_OUTER).switch(Entity).join(TableColumn).switch(
-            Entity).join(Rating).order_by(TableColumn.name))
-    columns = TableColumn.select().order_by(TableColumn.name)
-    rows = TableRow.select()
-    rows_pf = prefetch(rows, entities)
+    rows = queries.get_denormalized_rows()
+    columns = queries.get_columns()
 
-    rows = [_make_row(r, columns) for r in rows_pf]
+    rows = [_make_row(r, columns) for r in rows]
     header = [
         f"{c.name}\t{c.name}_passfail\t{c.name}_comment" for c in columns
     ]

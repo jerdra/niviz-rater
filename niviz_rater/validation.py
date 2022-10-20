@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+from typing import NewType, cast
 import os
 import yaml
 import yamale
@@ -5,6 +8,7 @@ from yamale.validators import DefaultValidators, Validator
 import niviz_rater.utils as utils
 
 SCHEMAFILE: str = os.path.join(os.path.dirname(__file__), 'data/schema.yaml')
+ValidConfig = NewType('ValidConfig', dict)
 
 
 def _get_valid_entities(bids_config_files):
@@ -65,7 +69,9 @@ def _configure_entity_validator(bids_configs):
     return ConfiguredEntities
 
 
-def validate_config(qc_spec_config, bids_configs, schema_file=SCHEMAFILE):
+def validate_config(qc_spec_config,
+                    bids_configs,
+                    schema_file=SCHEMAFILE) -> ValidConfig:
     """
     Validate a YAML-based configuration file against a
     schema file containing BIDS entity constraints
@@ -95,4 +101,4 @@ def validate_config(qc_spec_config, bids_configs, schema_file=SCHEMAFILE):
     with open(qc_spec_config, 'r') as f:
         config = yaml.load(f, Loader=yaml.CLoader)
 
-    return config
+    return cast(ValidConfig, config)

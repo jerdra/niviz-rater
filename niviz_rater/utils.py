@@ -1,11 +1,11 @@
+from __future__ import annotations
+
 import json
 import logging
-import os
-from typing import List, Iterable, Optional
+from typing import Iterable
 
 import bids.config
 from bids.layout import BIDSLayout, add_config_paths
-
 
 
 def load_json(file):
@@ -14,8 +14,7 @@ def load_json(file):
     return result
 
 
-def update_bids_configuration(
-        bids_config: str) -> Iterable[str]:
+def update_bids_configuration(bids_config: str) -> Iterable[str]:
     """
     Update configuration path for bids and return file paths
     for new configuration files
@@ -26,13 +25,12 @@ def update_bids_configuration(
     return bids.config.get_option('config_paths').values()
 
 
-def get_qc_bidsfiles(qc_dataset: str, qc_spec: dict) -> List[str]:
+def get_bids_layout(qc_dataset: str) -> BIDSLayout:
     """
-    Get BIDSFiles associated with qc_dataset
+    Get BIDSLayout associated with qc_dataset
     """
     layout = BIDSLayout(qc_dataset,
                         validate=False,
                         index_metadata=False,
                         config=["user"])
-    bidsfiles = layout.get(extension=qc_spec['ImageExtensions'])
-    return bidsfiles
+    return layout

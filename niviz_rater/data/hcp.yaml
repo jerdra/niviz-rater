@@ -8,7 +8,8 @@ RowDescription:
 
 Components:
   - entities: [subject]
-    name: "${subject} anatomical"
+    id: "anatomical"
+    label: "${subject} anatomical"
     column: "anatomical"
     images:
       - {description: t1wt2wcoreg}
@@ -23,7 +24,8 @@ Components:
       - Good
 
   - entities: [subject, session, task, run]
-    name: "${subject} session:${session} task:${task} run:${run} fMRI"
+    id: "functional"
+    label: "${subject} session:${session} task:${task} run:${run} fMRI"
     column: "ses-${session}_task-${task}_run-${run}"
     images:
       - {description: episdc}

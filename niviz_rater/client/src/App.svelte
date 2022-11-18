@@ -56,12 +56,12 @@
 		},
 		{
 			name: "Annotation Category",
-			value: (e) => e.annotation,
+			value: (e) => e.annotation.name,
 			selected: false
 		},
 		{
 			name: "Rating",
-			value: (e) => e.rating,
+			value: (e) => e.rating.name,
 			selected: false
 		}
 	];

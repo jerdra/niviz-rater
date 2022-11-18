@@ -18,7 +18,6 @@ database_proxy = DatabaseProxy()
 
 
 class BaseModel(Model):
-
     class Meta:
         database = database_proxy
 
@@ -145,7 +144,7 @@ class Entity(BaseModel):
         else:
             annotation = ""
 
-        if self.rating.name == "None":
+        if self.rating is None:
             rating = ""
         else:
             rating = self.rating.name

@@ -231,7 +231,7 @@ def _make_row(row, columns):
     """
     p = 0
     entities = row.entities
-    entries = [row.name]
+    entries = [row.name if row.name is not None else '']
     empty = ("", "", "")
     for c in columns:
         try:

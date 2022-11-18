@@ -102,11 +102,14 @@ def test_get_available_annotations(configured_db):
     db, settings, foreign_keys = configured_db
     entity = models.Entity.get_by_id(1)
     annotation_names = [
-        a.name for a in queries.get_available_annotations(entity)
+        a for a in queries.get_available_annotations(entity)
     ]
 
+    assert None in annotation_names
+    result = [a.name for a in annotation_names if a is not None]
+
     expected_names = settings["available_annotations"]
-    assert set(expected_names) == set(annotation_names)
+    assert set(expected_names) == set(result)
 
 
 def test_get_denormalized_table_rows(configured_db):
@@ -139,8 +142,8 @@ def test_get_denormalized_table_rows(configured_db):
 
     assert counter.count == 0
 
-def test_get_table_columns_returns_ordered_columns(db):
 
+def test_get_table_columns_returns_ordered_columns(db):
 
     db.create_tables(models.DB_TABLES)
     tc1 = models.TableColumn.create(name="a")
